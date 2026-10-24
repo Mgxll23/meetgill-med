@@ -9,7 +9,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="styles.css?v=13">
+<link rel="stylesheet" href="hero-v2/hero.css?v=13">
 </head>
 <body>
 <div class="announce">Free to use while we are in preview. <a href="pricing.html">See what's planned</a></div>
@@ -34,25 +35,47 @@
 </header>
 
 <main>
-<section class="hero dark">
-  <div class="wrap grid">
-    <div>
-      <span class="over rv">For nursing and medical students</span>
-      <h1 class="rv" style="--d:1">Practice the pump before you touch the <span class="accent">pump</span>.</h1>
-      <p class="lead rv" style="--d:2">Virtual training instruments built for nursing and medical students. Start with the infusion pump: rehearse your IV return demo, check your numbers, learn what every alarm means, and see exactly which step you missed.</p>
-      <div class="hero-actions rv" style="--d:3">
-        <a class="btn solid" href="pump.html">Use the pump</a>
-        <a class="btn" href="#how">See how it works</a>
-      </div>
-      <div class="facts rv" style="--d:4">
-        <div><b>30</b>drugs in the library</div>
-        <div><b>19</b>steps in the return demo</div>
-        <div><b>0</b>installs, runs in your browser</div>
+<!-- HERO v2: sticky scroll-driven 3D pump (see hero-v2/hero.css + hero.js) -->
+<section class="h2 h2--site" id="top" aria-label="Introduction">
+  <div class="h2-sticky">
+    <div class="h2-bg" aria-hidden="true">
+      <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>
+      <div class="dots"></div>
+      <svg class="tube" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+        <defs><linearGradient id="fluid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9d92ff"/><stop offset="1" stop-color="#6fa4ff"/></linearGradient></defs>
+        <g transform="translate(930 40)">
+          <rect x="-16" y="0" width="32" height="14" rx="4" fill="#2d4478"/>
+          <path d="M-22 14h44l-4 70a18 18 0 0 1-36 0z" fill="rgba(160,170,255,.10)" stroke="rgba(190,200,255,.35)" stroke-width="2"/>
+          <circle class="drop" cx="0" cy="20" r="4.5" fill="#b7b0ff"/>
+          <circle class="drop d2" cx="0" cy="20" r="4.5" fill="#b7b0ff"/>
+        </g>
+        <path id="line" d="M930 118 C930 220 1010 250 1010 340 S860 430 760 470 S300 520 250 660 S420 790 700 790" fill="none" stroke="rgba(190,200,255,.16)" stroke-width="12" stroke-linecap="round"/>
+        <path class="flow" d="M930 118 C930 220 1010 250 1010 340 S860 430 760 470 S300 520 250 660 S420 790 700 790" fill="none" stroke="url(#fluid)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle r="5" fill="#d6d2ff"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#line"/></animateMotion></circle>
+        <circle r="4" fill="#9fc0ff"><animateMotion dur="9s" begin="-4.5s" repeatCount="indefinite"><mpath href="#line"/></animateMotion></circle>
+      </svg>
+    </div>
+    <div class="h2-copy">
+      <span class="h2-over">For nursing and medical students</span>
+      <h1>Practice the pump before you touch the <em>pump.</em></h1>
+      <p>A virtual infusion pump for nursing students. Rehearse your IV return demo and learn what every alarm means.</p>
+      <div class="h2-actions">
+        <a class="h2-btn h2-btn--solid" href="pump.html">Use the pump</a>
+        <a class="h2-btn" href="#how">See how it works</a>
       </div>
     </div>
-    <div class="hero-pump rv" style="--d:2"><div data-pump="run"></div></div>
+    <div class="h2-stage" aria-hidden="true">
+      <div class="h2-rot" id="rot"><div class="h2-pump" id="pump"></div></div>
+      <div class="h2-cap" id="cap"><b></b><span></span></div>
+    </div>
+    <div class="h2-hint" id="hint"><i></i>Scroll to open the pump</div>
   </div>
 </section>
+<div class="h2-facts" aria-label="At a glance">
+  <div><b>30</b>drugs in the library</div>
+  <div><b>19</b>steps in the return demo</div>
+  <div><b>0</b>installs, runs in your browser</div>
+</div>
 
 <section class="scene" id="how" aria-label="What the pump can do">
   <div class="scene__pin">
@@ -179,7 +202,12 @@
 
 
 
+
+
+
+
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=13"></script>
+<script src="hero-v2/hero.js?v=13"></script>
 </body>
 </html>

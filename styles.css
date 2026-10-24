@@ -117,9 +117,11 @@ section{position:relative}
 .step p{color:#AEB8D2;max-width:44ch;margin:0;font-size:clamp(17px,1.5vw,20px)}
 .step .lcd-inline{display:none}
 .scene__rail{position:absolute;left:24px;right:24px;bottom:36px;display:flex;gap:8px;max-width:var(--wrap)}
-.scene__rail i{flex:1;height:3px;background:#2A3558;border-radius:2px;position:relative;overflow:hidden}
-.scene__rail i::after{content:"";position:absolute;inset:0;background:#8B7DFF;transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
-.scene__rail i.on::after{transform:scaleX(1)}
+.scene__rail i{flex:1;height:3px;background:#2A3558;border-radius:2px;position:relative;cursor:pointer}
+.scene__rail i::before{content:"";position:absolute;inset:-16px 0}                       /* bigger tap target */
+.scene__rail i::after{content:"";position:absolute;inset:0;border-radius:2px;background:#8B7DFF;transform:scaleX(var(--f,0));transform-origin:left}
+.scene__rail i:focus-visible{outline:2px solid #B7AEFF;outline-offset:6px}
+.scene.live .step{transition:none;will-change:opacity,transform}
 .scene__pump{display:grid;place-items:center}
 .scene__pump .pump{max-width:640px}
 

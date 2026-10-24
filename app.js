@@ -75,23 +75,66 @@
   var rail=[].slice.call(document.querySelectorAll('.scene__rail i'));
   var sceneMount=document.querySelector('.scene__pump [data-pump]');
   var keys=['prime','prog','alarm','limit'], last=-1, ticking=false;
+
+  /* Hero pump parallax (desktop only). */
   function frame(){
     ticking=false;
     var vh=window.innerHeight;
     if(hp && !reduce && window.innerWidth>900){ var y=Math.min(window.scrollY,vh); hp.style.transform='translate3d(0,'+(y*-0.08)+'px,0)'; }
-    if(scene && !reduce){
-      var r=scene.getBoundingClientRect(), total=r.height-vh;
-      var p=Math.max(0,Math.min(.999,-r.top/total)), idx=Math.floor(p*steps.length);
-      if(idx!==last){
-        last=idx;
-        steps.forEach(function(s,i){s.classList.toggle('on',i===idx);});
-        rail.forEach(function(s,i){s.classList.toggle('on',i<=idx);});
-        if(sceneMount) setLcd(sceneMount,keys[idx]);
-      }
-    }
   }
   function req(){ if(!ticking){ ticking=true; requestAnimationFrame(frame); } }
   window.addEventListener('scroll',req,{passive:true}); window.addEventListener('resize',req); frame();
+
+  /* ---------- pinned four-step scene ----------
+     Driven continuously: scroll position is smoothed, then every step cross-fades and
+     drifts based on its distance from the current position, so nothing snaps. The
+     progress bar fills as you go and each segment can be clicked to jump to a step. */
+  function clamp01(v){ return Math.max(0,Math.min(1,v)); }
+  var sp=0, sceneRaf=0, lastT=0, lastIdx=-1;
+  function scenePos(){
+    var r=scene.getBoundingClientRect(), total=r.height-window.innerHeight;
+    return total>0 ? clamp01(-r.top/total) : 0;
+  }
+  function sceneFrame(t){
+    sceneRaf=0;
+    var dt=lastT?Math.min(64,t-lastT):16; lastT=t;
+    var p=scenePos();
+    sp+=(p-sp)*(1-Math.exp(-dt/120));
+    var n=steps.length, x=sp*n;                           /* 0..n, step i is centred at i+0.5 */
+    steps.forEach(function(s,i){
+      var d=x-(i+.5);
+      if(i===0 && d<0) d=0;                               /* first step is fully shown at the very start */
+      if(i===n-1 && d>0) d=0;                             /* last step stays until the scene ends */
+      var o=clamp01(1-(Math.abs(d)-.2)/.22);              /* solid in the middle, fully gone before the next one arrives */
+      s.style.opacity=o.toFixed(3);
+      s.style.transform='translate3d(0,'+(-d*80).toFixed(1)+'px,0)';
+      s.style.pointerEvents=o>.6?'auto':'none';
+    });
+    rail.forEach(function(r,i){ r.style.setProperty('--f',clamp01(x-i).toFixed(3)); });
+    var idx=Math.min(n-1,Math.max(0,Math.floor(x)));
+    if(idx!==lastIdx){
+      lastIdx=idx;
+      steps.forEach(function(s,i){ s.classList.toggle('on',i===idx); });
+      if(sceneMount) setLcd(sceneMount,keys[idx]);
+    }
+    if(Math.abs(p-sp)>.0004) sceneRaf=requestAnimationFrame(sceneFrame);
+  }
+  function sceneReq(){ if(!sceneRaf){ lastT=0; sceneRaf=requestAnimationFrame(sceneFrame); } }
+  if(scene && !reduce){
+    scene.classList.add('live');
+    sp=scenePos();
+    window.addEventListener('scroll',sceneReq,{passive:true}); window.addEventListener('resize',sceneReq);
+    rail.forEach(function(seg,i){
+      seg.setAttribute('role','button'); seg.setAttribute('aria-label','Go to step '+(i+1)); seg.tabIndex=0;
+      function go(){
+        var r=scene.getBoundingClientRect(), total=r.height-window.innerHeight;
+        window.scrollTo({top:window.scrollY+r.top+((i+.5)/steps.length)*total,behavior:'smooth'});
+      }
+      seg.addEventListener('click',go);
+      seg.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+    });
+    sceneFrame(performance.now());
+  }
   if(scene && reduce){ steps.forEach(function(s){s.classList.add('on');}); }
 
   /* ---------- toast (used by the mock checkout) ---------- */
