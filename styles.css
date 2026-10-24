@@ -398,4 +398,4 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
   .scene__text{min-height:290px}
 }
 
-.pf.crop{overflow:hidden;border-radius:22px 22px 14px 14px}
+@media (max-width:600px){.pf{width:calc(100% + 24px);margin-left:-12px}}

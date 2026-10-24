@@ -42,10 +42,7 @@
     '</div></div></div>';
   }
   function arrowSvg(k){return '<svg viewBox="0 0 24 24"><path d="'+AR[k]+'"/></svg>';}
-  function fit(pf){ var s=pf.firstChild; if(!s) return; var w=900;
-    if(pf.clientWidth<520){ /* phone: crop to the screen side so the text stays readable */
-      var P=s.firstChild,F=P.querySelector('.p9-face'),L=P.querySelector('.p9-left'); w=F.offsetLeft+L.offsetLeft+L.offsetWidth+14; pf.classList.add('crop'); } else pf.classList.remove('crop');
-    var k=pf.clientWidth/w; s.style.transform='scale('+k+')'; pf.style.height=(s.offsetHeight*k)+'px'; }
+  function fit(pf){ var s=pf.firstChild; if(!s) return; var k=pf.clientWidth/900; s.style.transform='scale('+k+')'; pf.style.height=(s.offsetHeight*k)+'px'; }
   document.querySelectorAll('[data-pump]').forEach(function(m){
     m.classList.add('pf'); m.innerHTML=pumpHTML(m.getAttribute('data-pump')); fit(m);
     if(window.ResizeObserver) new ResizeObserver(function(){fit(m);}).observe(m); else window.addEventListener('resize',function(){fit(m);});
