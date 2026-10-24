@@ -128,7 +128,7 @@
   /* The hero is a normal block: it scrolls away like any other section (no pinning).
      As the visitor scrolls, the pump opens up; once open it stays open (with a gentle
      float) until they scroll back to the top. The screen stays on the home screen. */
-  function ease(t){ return t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }      /* easeInOutCubic */
+  function ease(t){ return 1 - Math.pow(1 - t, 2.2); }                       /* easeOut: moves right from the first pixel of scroll */
   function lerp(a,b,t){ return a + (b-a)*t; }
   function clamp(v){ return Math.max(0, Math.min(1, v)); }
 
@@ -137,9 +137,9 @@
 
   function render(t){
     var dt = lastT ? Math.min(64, t - lastT) : 16; lastT = t;
-    /* opens over the first ~60% of the hero's height of scrolling */
-    progress = clamp(window.scrollY / (hero.offsetHeight * 0.6));
-    sp += (progress - sp) * (1 - Math.exp(-dt / 130));
+    /* opens over the first ~35% of the hero's height of scrolling, starting immediately */
+    progress = clamp(window.scrollY / (hero.offsetHeight * 0.35));
+    sp += (progress - sp) * (1 - Math.exp(-dt / 90));
     px += (tx - px) * .06; py += (ty - py) * .06;
 
     var phone = window.innerWidth <= 860;
