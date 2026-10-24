@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Checkout - MeetGill Med</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+<header class="nav scrolled">
+  <div class="wrap">
+    <a class="brand" href="index.html">Meet<i>|</i>Gill Med</a>
+    <a href="pricing.html" style="font:500 15px var(--f-body)">← Back to pricing</a>
+  </div>
+</header>
+
+<main class="co">
+  <div class="co__main">
+    <h1>Complete your plan</h1>
+    <form id="f" novalidate>
+      <div class="seg" role="radiogroup" aria-label="Plan">
+        <label><input type="radio" name="plan" value="monthly"><b>1 month</b><span>$5.99</span></label>
+        <label><input type="radio" name="plan" value="sixmonth"><b>6 months</b><span>$24.99, save 30%</span></label>
+        <label><input type="radio" name="plan" value="yearly" checked><b>Yearly</b><span>$39.99, save 44%</span></label>
+      </div>
+      <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="you@school.ca"></div>
+      <button class="btn solid" type="submit" style="width:100%;min-height:56px">Continue to secure payment</button>
+      <p class="secure">Payment is handled on a secure page hosted by our payment provider. Card details are never entered or stored on this site.</p>
+    </form>
+  </div>
+  <aside class="co__side">
+    <span class="over">Order summary</span>
+    <div class="sum">
+      <div class="r"><span id="pn">Yearly plan</span><span id="pp">$39.99</span></div>
+      <div class="r"><span>Full access to all instruments</span><span></span></div>
+      <div class="r"><span>Taxes</span><span>Calculated at payment</span></div>
+      <div class="r t"><span>Total today (CAD)</span><span id="pt">$39.99</span></div>
+    </div>
+    <p style="color:#9AA6C4;font-size:14px;margin-top:28px">Draft screen. Payments are not connected yet and prices are placeholders. Billing questions? <a href="mailto:billing@meetgillmed.com" style="color:#A79CFF">billing@meetgillmed.com</a></p>
+  </aside>
+</main>
+<div class="toast" role="status" aria-live="polite"></div>
+<script src="app.js?v=1"></script>
+<script>
+(function(){
+  var P={monthly:['1-month plan','$5.99'],sixmonth:['6-month plan','$24.99'],yearly:['Yearly plan','$39.99']};
+  function show(k){ document.getElementById('pn').textContent=P[k][0]; document.getElementById('pp').textContent=P[k][1]; document.getElementById('pt').textContent=P[k][1]; }
+  var q=new URLSearchParams(location.search).get('plan'); if(P[q]){ document.querySelector('input[value='+q+']').checked=true; }
+  var radios=document.querySelectorAll('input[name=plan]');
+  function cur(){ return document.querySelector('input[name=plan]:checked').value; }
+  radios.forEach(function(r){ r.addEventListener('change',function(){ show(cur()); }); }); show(cur());
+  document.getElementById('f').addEventListener('submit',function(e){ e.preventDefault(); window.toast('Payments are not connected yet. This is a draft screen.'); });
+})();
+</script>
+</body>
+</html>

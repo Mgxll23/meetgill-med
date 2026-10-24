@@ -1,0 +1,2322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pump Sim">
+<meta name="theme-color" content="#0f1113">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2326292d'/%3E%3Crect x='10' y='12' width='44' height='26' rx='4' fill='%2314180f'/%3E%3Ctext x='32' y='31' font-size='14' text-anchor='middle' fill='%239dff6a' font-family='monospace'%3E24.4%3C/text%3E%3Ccircle cx='22' cy='50' r='6' fill='%232ee86a'/%3E%3Ccircle cx='42' cy='50' r='6' fill='%23ffd54a'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2326292d'/%3E%3Crect x='10' y='12' width='44' height='26' rx='4' fill='%2314180f'/%3E%3Ctext x='32' y='31' font-size='14' text-anchor='middle' fill='%239dff6a' font-family='monospace'%3E24.4%3C/text%3E%3Ccircle cx='22' cy='50' r='6' fill='%232ee86a'/%3E%3Ccircle cx='42' cy='50' r='6' fill='%23ffd54a'/%3E%3C/svg%3E">
+<title>M | Gill Infusion Pump</title>
+<style>
+:root{
+  --lcd-bg:#05080a; --lcd-fg:#f3f6f8; --lcd-dim:#9aa4ac; --warn:#ffffff; --bad:#ff5a4a;
+  --teal1:#243a66; --teal2:#16233F; --teal3:#2d4478; --teal4:#1d2f57; --iconteal:#5b4de0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:#0B1226;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none;overflow:hidden;touch-action:manipulation}
+button{font:inherit;color:inherit;touch-action:manipulation}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+body.wide #stage{right:400px}
+#pumpWrap{position:relative;flex:none}
+#rig{position:absolute;left:0;top:0;transform-origin:0 0}
+#rig.land{width:900px;--pp:24px;--cell:54px;--ks:46px;--lidh:92px}
+#rig.port{width:390px;--pp:8px;--cell:48px;--ks:44px;--lidh:36px}
+
+/* ---------- pump body ---------- */
+#pump{position:relative;padding:0 var(--pp) 16px;border-radius:30px 30px 20px 20px;
+  background:linear-gradient(180deg,#f4f4f0 0%,#e3e3dd 45%,#cfcfc8 100%);
+  box-shadow:0 22px 44px rgba(0,0,0,.6),inset 0 2px 2px rgba(255,255,255,.9),inset 0 -4px 8px rgba(0,0,0,.18),0 0 0 1px #9a9a94}
+#rig.port #pump{border-radius:22px 22px 16px 16px}
+#lidWrap{position:relative;height:var(--lidh);perspective:900px;margin:0 calc(var(--pp)*-1 + 10px)}
+.doorgfx{position:absolute;inset:6px 0 0;border-radius:24px 24px 8px 8px;cursor:pointer;z-index:2;transform-origin:50% 0;transition:transform .8s cubic-bezier(.3,.7,.3,1);
+  background:linear-gradient(180deg,#fbfbf8 0%,#e6e6e0 70%,#d2d2cb 100%);
+  box-shadow:inset 0 2px 0 #fff,inset 0 -8px 12px rgba(0,0,0,.12),0 2px 0 rgba(0,0,0,.2)}
+#rig.port .doorgfx{border-radius:16px 16px 6px 6px}
+.doorgfx::before{content:'';position:absolute;left:3%;right:3%;bottom:10px;height:2px;background:rgba(0,0,0,.14);border-radius:2px}
+.stub{position:absolute;top:56%;width:38px;height:5px;border-radius:3px;background:#4cc3ff;opacity:0;transition:opacity .3s;z-index:0;box-shadow:0 0 5px rgba(76,195,255,.6)}
+.stub.l{left:-26px}.stub.r{right:-26px}
+.doorgfx.hasline ~ .stub{opacity:1}
+.doorgfx.open{transform:rotateX(-82deg)}
+#chamber{position:absolute;inset:8px 6px 0;border-radius:18px 18px 4px 4px;background:linear-gradient(#34383e,#0E1730);box-shadow:inset 0 5px 14px #000;overflow:hidden;z-index:1}
+#chamber .slot{position:absolute;left:8%;right:8%;top:42%;height:22%;border-radius:8px;background:#0a0b0d;box-shadow:inset 0 2px 6px #000,0 1px 0 rgba(255,255,255,.1)}
+#chamber .tube{position:absolute;left:0;right:0;top:50%;height:5px;background:#4cc3ff;opacity:0;transition:opacity .3s;box-shadow:0 0 6px rgba(76,195,255,.6)}
+.doorgfx.hasline ~ #chamber .tube{opacity:1}
+.pill{position:absolute;top:4px;right:calc(var(--pp) + 6px);z-index:5;background:rgba(255,255,255,.85);border:1px solid #9a9a94;color:#333;border-radius:16px;padding:0 12px;height:30px;font-size:12px}
+body.wide .pill{display:none}
+
+/* ---------- british racing green faceplate ---------- */
+#face{display:flex;gap:12px;padding:12px;border-radius:14px 14px 18px 18px;margin-top:-2px;position:relative;z-index:3;
+  background:linear-gradient(180deg,var(--teal1),var(--teal2));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 3px 6px rgba(0,0,0,.3)}
+#rig.port #face{flex-direction:column;padding:8px 6px;gap:8px}
+#faceL{flex:1;min-width:0;display:flex;flex-direction:column}
+#logorow{display:flex;align-items:center;justify-content:space-between;height:26px;margin-bottom:5px}
+.bb{color:#fff;font-weight:800;letter-spacing:.12em;font-size:14px;display:flex;gap:3px;align-items:baseline}
+.bb i{font-style:normal;font-weight:400;opacity:.9}
+.ledwin{display:flex;gap:7px;padding:4px 8px;border-radius:6px;background:rgba(6,10,28,.55)}
+.led{width:28px;height:11px;border-radius:3px;background:rgba(0,0,0,.45);box-shadow:inset 0 1px 2px #000,0 0 0 1px rgba(0,0,0,.35);display:block;transition:background .2s,box-shadow .2s}
+.led.g{--c:#3dff7e}.led.r{--c:#ff4036}.led.y{--c:#ffcf3a}.led.b{--c:#42a8ff}
+.led.on{background:var(--c);box-shadow:0 0 10px var(--c)}
+.led.blink{animation:blink 1s steps(1) infinite}
+.led.blink.fast{animation-duration:.5s}
+.led.pulse{animation:pulse 2.2s ease-in-out infinite}
+.led.flash1{animation:flash1 1.4s steps(1) 1}
+@keyframes blink{0%,49%{background:var(--c);box-shadow:0 0 10px var(--c)}50%,100%{background:rgba(0,0,0,.45);box-shadow:inset 0 1px 2px #000}}
+@keyframes pulse{0%,100%{background:#12304d}50%{background:var(--c);box-shadow:0 0 8px var(--c)}}
+@keyframes flash1{0%,49%{background:var(--c);box-shadow:0 0 10px var(--c)}50%,100%{background:rgba(0,0,0,.45)}}
+.model{color:#fff;font-style:italic;font-size:12.5px;margin-top:5px;padding-left:4px;height:18px;opacity:.95}
+.model sup{font-size:8px}
+
+/* ---------- LCD (black, white text) ---------- */
+#lcd{position:relative;height:262px;border-radius:12px;background:var(--lcd-bg);padding:6px 10px;color:var(--lcd-fg);
+  font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-weight:600;font-size:15px;
+  box-shadow:inset 0 0 0 3px #111,inset 0 0 0 4px #2e3438,inset 0 6px 18px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.4);
+  filter:contrast(var(--ct,1)) brightness(var(--br,1));overflow:hidden;display:flex;flex-direction:column}
+#lcd.off{background:#0a0d0e;filter:none}
+#lcd.off #lcdTop,#lcd.off #lcdBot{visibility:hidden}
+#lcdTop{height:23px;display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;border-bottom:1px solid var(--lcd-dim);font-size:13px;white-space:nowrap}
+#lcdTl{background:var(--lcd-fg);color:#000;padding:0 6px;border-radius:2px;font-weight:800;letter-spacing:.04em}
+#lcdTl:empty{display:none}
+#lcdTc{text-align:center}
+#lcdTr{background:var(--lcd-fg);color:#000;padding:0 6px;border-radius:2px;font-weight:800}
+#lcdTr:empty{display:none}
+#lcdBat{display:flex;align-items:center;gap:4px}
+.bat{display:inline-block;width:22px;height:10px;border:1px solid var(--lcd-fg);position:relative;border-radius:2px}
+.bat b{position:absolute;left:0;top:0;bottom:0;background:var(--lcd-fg)}
+.bat.low b{background:var(--bad)}.bat.low{border-color:var(--bad)}
+.ac{font-size:11px}
+#lcdBody{flex:1;overflow:hidden;padding-top:2px}
+.row{height:24px;line-height:24px;display:flex;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden}
+.row.hrow{height:auto;line-height:normal;display:block}
+.row .l{overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+.row .r{flex:none}
+.row.hl{background:var(--lcd-fg);color:#000;font-weight:800;padding:0 4px;margin:0 -4px}
+.row.dim,.dim{color:var(--lcd-dim)}
+.row.hd{color:#fff;font-weight:800;border-bottom:1px solid var(--lcd-dim)}
+.row.warn .l,.row.warn{color:#000;background:#fff;font-weight:800;padding:0 4px;margin:0 -4px}
+.warn{color:#fff;font-weight:800}
+.row.calc{color:#fff}
+#lcdBot{height:24px;line-height:24px;border-top:1px solid var(--lcd-dim);font-size:12.5px;white-space:pre;overflow:hidden;text-overflow:ellipsis;color:var(--lcd-dim)}
+#lcdBot .toast{color:#000;background:#fff;padding:1px 6px;border-radius:2px;font-weight:800}
+.logo{font-size:40px;font-weight:800;text-align:center;letter-spacing:.06em;color:#fff;line-height:60px}
+.logo span{color:#fff;margin:0 2px;font-weight:300}
+.logosub{text-align:center;color:var(--lcd-dim);height:24px}
+.edbig{font-size:38px;line-height:54px;height:54px;display:flex;align-items:center;justify-content:center;gap:1px;letter-spacing:1px}
+.edbig.sm{font-size:30px}
+.edbig .dg{display:inline-block;width:25px;text-align:center}
+.edbig .dg.lz{color:var(--lcd-dim)}
+.edbig .dg.act,.edbig .fld.act{background:#fff;color:#000;border-radius:2px}
+.edbig .sep{display:inline-block;width:10px;text-align:center}
+.edbig .fld{padding:0 3px}
+.edunit{font-size:13px;margin-left:10px;align-self:flex-end;line-height:34px}
+.lvbar{display:flex;gap:4px;justify-content:center;height:20px;align-items:center}
+.lv{width:22px;height:14px;border:1px solid var(--lcd-fg);display:inline-block}.lv.on{background:var(--lcd-fg)}
+.runrate{font-size:34px;line-height:46px;height:46px;text-align:center;font-weight:800;color:#fff;width:100%}
+.runrate small{font-size:15px;font-weight:600}
+.macro{font-size:84px;line-height:104px;height:104px;text-align:center;font-weight:800;width:100%;color:#fff}
+.arrows{position:relative;display:flex;justify-content:center;gap:14px;width:100%;color:#fff}
+.arrows span{animation:arr 1s linear infinite;opacity:.25}
+.arrows span:nth-child(2){animation-delay:.15s}.arrows span:nth-child(3){animation-delay:.3s}.arrows span:nth-child(4){animation-delay:.45s}.arrows span:nth-child(5){animation-delay:.6s}
+@keyframes arr{0%{opacity:.2}30%{opacity:1}100%{opacity:.2}}
+.arrows .tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;color:#000;padding:0 10px;font-size:15px;letter-spacing:.1em;font-weight:800}
+.alarmov{position:absolute;inset:6px 8px;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:6px;z-index:5}
+.alarmov.op,.alarmov.dev{background:#2a0a08;border:2px solid var(--bad);color:#ffd9d4;animation:alarmflash 1s steps(1) infinite}
+.alarmov.pre,.alarmov.rem{background:#241f05;border:2px solid #ffd23f;color:#fff2bd}
+.alarmov.dev{background:#3a0a2a;border-color:#ff4fd8}
+@keyframes alarmflash{0%,49%{background:#4a0e0a}50%,100%{background:#2a0a08}}
+.alab{font-size:13px;letter-spacing:.12em;font-weight:700;opacity:.9}
+.amsg{font-size:21px;font-weight:800;line-height:1.15}
+.asub{font-size:13px;opacity:.85}
+.ahint{font-size:13px;font-weight:700;margin-top:4px}
+.more{font-size:11px;opacity:.7}
+#holdbar{display:none;position:absolute;left:30px;right:30px;top:50%;transform:translateY(-50%);z-index:9;text-align:center;font-size:13px;color:#fff}
+#holdbar .bar{height:14px;border:2px solid #fff;margin-top:8px;border-radius:3px;overflow:hidden;background:#000}
+#holdfill{height:100%;width:0;background:#fff}
+
+/* ---------- keypad ---------- */
+#lower{display:flex;gap:10px;align-items:stretch}
+#rig.port #lower{gap:6px;justify-content:center}
+#rig.port #doorCol{padding:4px}
+#keys{display:flex;gap:calc(var(--cell)*.22);align-items:center;padding:10px;border-radius:20px;
+  background:linear-gradient(180deg,var(--teal3),var(--teal4));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(8,14,40,.4)}
+#rig.port #keys{padding:4px;gap:4px}
+#doorCol{display:flex;align-items:center;padding:6px;border-radius:20px;
+  background:linear-gradient(180deg,var(--teal3),var(--teal4));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(8,14,40,.4)}
+#rig.land #doorCol{width:74px;justify-content:center}
+.dpad{display:grid;grid-template-columns:repeat(3,var(--cell));grid-template-rows:repeat(3,var(--cell))}
+.dpad .up{grid-area:1/2}.dpad .lf{grid-area:2/1}.dpad .rt{grid-area:2/3}.dpad .dn{grid-area:3/2}
+.cluster{display:grid;grid-template-columns:repeat(3,var(--cell));grid-template-rows:repeat(2,var(--cell));align-self:center}
+.key{position:relative;width:var(--ks);height:var(--ks);margin:calc((var(--cell) - var(--ks))/2);padding:0;border:none;border-radius:14px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--iconteal);font-weight:800;font-size:15px;
+  background:radial-gradient(circle at 35% 28%,#ffffff 0%,#eef2f2 55%,#d4dbdb 100%);
+  box-shadow:0 3px 0 #0a1226,0 5px 8px rgba(0,0,0,.35),inset 0 -2px 4px rgba(0,0,0,.08);
+  transition:transform .05s,box-shadow .05s}
+.key svg{width:50%;height:50%;fill:var(--iconteal);stroke:var(--iconteal)}
+.key.arr svg{fill:none;stroke:var(--iconteal);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;width:54%;height:54%}
+.key.door svg{width:46%;height:46%}
+.key.pw svg{stroke:var(--iconteal);fill:none;width:52%;height:52%}
+.key.down{transform:translateY(3px);box-shadow:0 0 0 #0a1226,inset 0 3px 6px rgba(0,0,0,.3)}
+.key.c span{font-size:19px}
+.key.ok span{font-size:15px}
+.key.bol{background:radial-gradient(circle at 35% 28%,#ffe98a 0%,#ffd21f 55%,#e0a900 100%);color:#2f2400}
+.key.bol span{font-size:13px;letter-spacing:.02em}
+.key.bol small{font-size:9px;margin-top:1px}
+.key.m{background:radial-gradient(circle at 35% 28%,#a79cff 0%,#6c5ce7 60%,#4a3bc7 100%)}
+.key.m svg{stroke:#fff;fill:none}
+.key.ss{overflow:hidden;background:#fff}
+.key.ss span{position:absolute;left:0;right:0;height:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800}
+.key.ss .st{top:0;background:linear-gradient(#ffffff,#e9efef);color:#139a4a}
+.key.ss .sp{bottom:0;background:linear-gradient(#ee4b3f,#c8281d);color:#fff}
+#keys{filter:brightness(calc(.85 + var(--kl,.5)*.3))}
+
+/* ---------- tubing / door controls (outside pump) ---------- */
+#doorBar{margin-top:12px;height:40px;display:flex;align-items:center;gap:10px;font-size:12px;color:#aeb4bb;padding:0 6px}
+#doorTxt{flex:1;min-width:0;line-height:1.15}
+.chip{background:#16213F;border:1px solid #4a4f57;color:#d6dae0;border-radius:10px;padding:0 12px;height:38px;font-size:12.5px;min-width:96px}
+.chip:disabled{opacity:.4}
+.chip.bad{border-color:var(--bad);color:#ffb3aa}
+
+/* ---------- side panel ---------- */
+#panel{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;background:#101A33;border-left:1px solid #26335A;overflow-y:auto;z-index:30;padding:0 16px 24px;
+  -webkit-user-select:text;user-select:text;transform:translateX(100%);transition:transform .25s}
+body.wide #panel{transform:none}
+body.panelopen #panel{transform:none}
+body.wide #panelClose{display:none}
+#panel .ph{position:sticky;top:0;background:#101A33;display:flex;justify-content:space-between;align-items:center;padding:14px 0 8px;font-size:16px;z-index:2}
+#panel .ph button{background:none;border:none;font-size:22px;color:#aaa;width:44px;height:44px}
+#panel section{border-top:1px solid #26335A;padding:12px 0}
+#panel h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8a919a}
+#panel select{width:100%;height:44px;background:#16213F;color:#e8eaed;border:1px solid #33457A;border-radius:8px;padding:0 8px;font-size:15px}
+#panel .btns{display:flex;gap:8px;margin-top:8px}
+#panel .btns button{flex:1;height:44px;border-radius:8px;border:1px solid #33457A;background:#1B2850;color:#e8eaed;font-size:14px}
+#panel .btns button:disabled{opacity:.4}
+#panel .btns button.on,#panel .btns button#acBtn.on{background:#4338C8;border-color:#5B4DE0}
+#panel .btns button.warnbtn{border-color:#7a2f2a;color:#ffb3aa}
+#panel #scnStart{background:#4338C8;border-color:#5B4DE0}
+.brief{font-size:14px;line-height:1.4;background:#16213F;border-radius:8px;padding:10px;margin:10px 0 6px}
+.prog{font-size:13px;color:#8fd1a5}.hint{font-size:13px;color:#ffd23f;min-height:18px}
+.lab{font-size:12px;color:#8a919a;margin-top:6px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;margin:10px 0;min-height:32px}
+.small{font-size:12.5px;color:#9aa1aa;line-height:1.45}
+#report{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:12px}
+#report.show{display:flex}
+#report .card{background:#101A33;border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;padding:18px;-webkit-user-select:text;user-select:text;position:relative}
+#reportClose{position:sticky;top:0;float:right;height:40px;padding:0 14px;border-radius:8px;border:1px solid #33457A;background:#1B2850;color:#e8eaed}
+#report h2{margin:0 0 6px;font-size:18px;padding-right:90px}
+#report h3{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#8a919a}
+.score{font-size:54px;font-weight:800}.score.good{color:#4ade80}.score.mid{color:#facc15}.score.bad{color:#f87171}
+.tally{display:flex;gap:14px;font-size:14px;font-weight:600;flex-wrap:wrap}.tally .ok{color:#4ade80}.tally .bad{color:#f87171}.tally .miss{color:#facc15}
+.steps{padding-left:20px;margin:0}.steps li{margin:3px 0;font-size:14px}.steps li.ok{color:#9be7b5}.steps li.miss{color:#ff9d93}
+.wrong{margin:0;padding-left:20px;font-size:14px;color:#ffb3aa}
+.walk{font-size:14px;line-height:1.5;background:#0E1730;padding:10px;border-radius:8px}
+@media (max-height:640px){ .pill{height:30px} }
+</style></head><body>
+<div id="stage">
+ <div id="pumpWrap"><div id="rig" class="land">
+  <div id="pump">
+   <button id="panelBtn" class="pill" type="button">☰ Practice</button>
+   <div id="lidWrap">
+     <div id="doorGfx" class="doorgfx" title="Pump door (tap to open/close)"></div>
+     <div id="chamber"><i class="slot"></i><i class="tube"></i></div>
+     <i class="stub l"></i><i class="stub r"></i>
+   </div>
+   <div id="face">
+    <div id="faceL">
+     <div id="logorow">
+       <span class="bb"><b>M</b><i>|</i><b>GILL</b></span>
+       <div class="ledwin"><i id="ledR" class="led r" title="Red: alarm"></i><i id="ledG" class="led g" title="Green: infusing"></i><i id="ledY" class="led y" title="Yellow: pre-alarm / reminder"></i><i id="ledB" class="led b" title="Blue: wireless"></i></div>
+     </div>
+     <div id="lcd" class="off">
+       <div id="lcdTop"><span id="lcdTl"></span><span id="lcdTc"></span><span id="lcdTr"></span><span id="lcdBat"></span></div>
+       <div id="lcdBody"></div>
+       <div id="lcdBot"></div>
+       <div id="holdbar"><div id="holdlab"></div><div class="bar"><div id="holdfill"></div></div></div>
+     </div>
+     <div class="model">M | Gill Infusion Pump</div>
+    </div>
+    <div id="lower">
+     <div id="keys">
+      <div class="dpad">
+        <button class="key arr up" data-k="u" type="button" aria-label="Up" title="Up"><svg viewBox="0 0 24 24"><path d="M12 19V6M6.5 11.5L12 6l5.5 5.5"/></svg></button>
+        <button class="key arr lf" data-k="l" type="button" aria-label="Left" title="Left"><svg viewBox="0 0 24 24"><path d="M19 12H6M11.5 6.5L6 12l5.5 5.5"/></svg></button>
+        <button class="key arr rt" data-k="r" type="button" aria-label="Right (hold = macro mode)" title="Right (hold = macro mode)"><svg viewBox="0 0 24 24"><path d="M5 12h13M12.5 6.5L18 12l-5.5 5.5"/></svg></button>
+        <button class="key arr dn" data-k="d" type="button" aria-label="Down" title="Down"><svg viewBox="0 0 24 24"><path d="M12 5v13M6.5 12.5L12 18l5.5-5.5"/></svg></button>
+      </div>
+      <div class="cluster">
+        <button class="key c" data-k="C" type="button" aria-label="Clear / back" title="C - Clear / back"><span>C</span></button>
+        <button class="key bol" data-k="nb" type="button" aria-label="Bolus (hold = manual)" title="BOL - tap: programmed bolus, hold: manual bolus"><span>BOL</span><small>◂◂</small></button>
+        <button class="key pw" data-k="pw" type="button" aria-label="On/Off (hold 3 s)" title="ON/OFF - hold 3 seconds"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 3.5v8"/><path d="M6.4 7a8 8 0 1 0 11.2 0"/></svg></button>
+        <button class="key ok" data-k="K" type="button" aria-label="OK" title="OK"><span>OK</span></button>
+        <button class="key m" data-k="m" type="button" aria-label="Auto-program" title="Auto-program"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6.5l6 5 6-5"/><path d="M6 12.5l6 5 6-5"/></svg></button>
+        <button class="key ss" data-k="sf" type="button" aria-label="Start / Stop" title="Start / Stop"><span class="st">Start</span><span class="sp">Stop</span></button>
+      </div>
+     </div>
+     <div id="doorCol">
+      <button class="key door" data-k="x" type="button" aria-label="Open door" title="Door"><svg viewBox="0 0 24 24"><path d="M12 5l7 8H5z"/><rect x="5" y="15.5" width="14" height="2.8" rx="1.2"/></svg></button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div id="doorBar">
+    <span id="doorTxt">Door closed</span>
+    <button id="btnLine" class="chip" type="button">Insert IV line</button>
+    <button id="btnClamp" class="chip" type="button">Clamp: open</button>
+  </div>
+ </div></div>
+
+ <aside id="panel">
+  <div class="ph"><b>Practice &amp; controls</b><button id="panelClose" type="button">✕</button></div>
+  <section>
+    <h3>Return demo practice</h3>
+    <select id="scnSel"></select>
+    <div class="btns"><button id="scnStart" type="button">Start scenario</button><button id="scnFree" type="button">Free practice</button></div>
+    <p id="scnBrief" class="brief"></p>
+    <label class="chk"><input type="checkbox" id="fullLib"> Full drug-library mode (extra steps: profile + category)</label>
+    <div id="scnProg" class="prog"></div>
+    <div class="btns"><button id="scnHint" type="button" disabled>Hint</button><button id="scnFinish" type="button" disabled>Finish &amp; score</button></div>
+    <p id="scnHintTxt" class="hint"></p>
+  </section>
+  <section>
+    <h3>Simulation</h3>
+    <div class="lab">Practice speed (infusion &amp; timers)</div>
+    <div class="btns seg"><button data-speed="1" class="on" type="button">1×</button><button data-speed="10" type="button">10×</button><button data-speed="100" type="button">100×</button></div>
+    <div class="btns"><button id="acBtn" type="button">AC: unplugged</button></div>
+    <label class="chk"><input type="checkbox" id="clipChk" checked> Anti-free-flow clip engaged</label>
+    <div class="lab">Simulate an alarm</div>
+    <select id="faultSel"></select>
+    <div class="btns"><button id="faultBtn" type="button">Trigger</button><button id="resetBtn" type="button" class="warnbtn">Reset pump</button></div>
+  </section>
+  <section>
+    <h3>Keys</h3>
+    <p class="small">Keys, top row: <b>C</b> (clear/back), <b>BOL</b> (tap = programmed bolus, hold = manual bolus), <b>ON/OFF</b> (hold 3 s). Bottom row: <b>OK</b>, <b>violet chevrons</b> (auto-program), <b>Start/Stop</b>. Far right: <b>door</b>. Hold ▶ while infusing for macro mode.</p>
+    <p class="small">Desktop keyboard: arrows, Enter = OK, Esc/Backspace = C, Space or S = Start/Stop, X = door, M = auto-program, hold B = bolus, hold P = ON/OFF.</p>
+  </section>
+  <section>
+    <h3>About</h3>
+    <p class="small">Unofficial practice simulator for learning pump programming sequences. Drug names, concentrations and limits are <b>illustrative only</b> and are not clinical reference. Always follow your facility's drug library, policy and the manufacturer's Instructions for Use. Not affiliated with any pump manufacturer.</p>
+  </section>
+ </aside>
+</div>
+<div id="report"><div class="card"><button id="reportClose" type="button">Close ✕</button><div id="reportBody"></div></div></div>
+<script>
+/* ===================================================================
+   DATA — drug library (ILLUSTRATIVE ONLY, not clinical reference)
+   Edit freely. Limits are in the drug's dose unit (du) unless noted.
+   =================================================================== */
+const FACTOR = {ng:0.001,mcg:1,mg:1000,g:1e6,mU:0.001,U:1,units:1,kU:1000,MU:1e6,mEq:1,mmol:1,kcal:1,mL:1};
+const CARE_UNITS = ['ICU','Med-Surg','Emergency','NICU','OR'];
+const PROFILES = ['Adult','Pediatric','Neonatal'];
+// [soft-high multiplier, hard-high multiplier] applied per care unit
+const UNIT_MULT = {ICU:[1,1],'Med-Surg':[0.5,0.8],Emergency:[1,1],NICU:[1,1],OR:[1,1]};
+// multiplier applied per patient profile to high limits
+const PROF_MULT = {Adult:1,Pediatric:0.5,Neonatal:0.25};
+// soft weight ranges per profile (kg)
+const WEIGHT_SOFT = {Adult:[40,150],Pediatric:[5,50],Neonatal:[0.5,5]};
+const DRUG_FILE_DATE = '2026-01-15';
+const SW_VERSION = '586U';
+const PRESSURE_MMHG = [225,300,375,450,525,600,675,750,900];
+
+const _U = {I:'ICU',M:'Med-Surg',E:'Emergency',N:'NICU',O:'OR'};
+const _P = {A:'Adult',P:'Pediatric',N:'Neonatal'};
+function mk(o){
+  o.u = [...o.u].map(c=>_U[c]);
+  o.pr = [...(o.pr||'AP')].map(c=>_P[c]);
+  o.m = [...(o.m||'C')];           // C = Continuous, D = Dose Over Time
+  o.role = o.role||'B';            // B both, P primary only, S secondary only
+  o.press = o.press||5;
+  o.dec = o.dec==null?2:o.dec;
+  return o;
+}
+
+const DRUGS = [
+ mk({id:'morph',s:'Morphine',l:'Morphine Sulfate',cat:'Analgesia',u:'IMEO',pr:'AP',
+   c:[[1,'mg',1],[100,'mg',100]],du:'mcg/kg/h',soft:[0.5,2],hard:[0,5],press:5,bol:{u:'mg',max:5}}),
+ mk({id:'fent',s:'Fentanyl',l:'Fentanyl Citrate',cat:'Analgesia',u:'IENO',pr:'APN',
+   c:[[50,'mcg',1],[1000,'mcg',100]],du:'mcg/kg/h',soft:[0.5,3],hard:[0,10],bol:{u:'mcg',max:100}}),
+ mk({id:'hydro',s:'Hydromorphone',l:'Hydromorphone HCl',cat:'Analgesia',u:'IME',pr:'AP',
+   c:[[2,'mg',1]],du:'mcg/kg/h',soft:[1,10],hard:[0,25],bol:{u:'mg',max:2},
+   adv:'HIGH ALERT: Hydromorphone is NOT interchangeable with morphine. Verify concentration (2 mg/mL) with a second RN. Hard limit 2 mg/h.'}),
+ mk({id:'acet',s:'Acetaminophen',l:'Acetaminophen IV',cat:'Analgesia',u:'IMEON',pr:'APN',m:'D',role:'S',
+   c:[[1000,'mg',100]],dot:{u:'mg',time:[15,30,5,60],dose:[500,1000,0,1000]}}),
+ mk({id:'norepi',s:'Norepinephrine',l:'Norepinephrine (Levophed)',cat:'Vasoactive',u:'IEO',pr:'AP',
+   c:[[4,'mg',250]],du:'mcg/kg/min',soft:[0.02,0.5],hard:[0,3],press:6,
+   adv:'HIGH ALERT: Vasopressor. Administer via central line where possible. Titrate to MAP target ordered.'}),
+ mk({id:'dopa',s:'Dopamine',l:'Dopamine HCl',cat:'Vasoactive',u:'IEN',pr:'APN',
+   c:[[400,'mg',250]],du:'mcg/kg/min',soft:[2,20],hard:[0,30],press:6}),
+ mk({id:'epi',s:'Epinephrine',l:'Epinephrine (Adrenaline)',cat:'Vasoactive',u:'IEON',pr:'APN',
+   c:[[4,'mg',250]],du:'mcg/kg/min',soft:[0.01,0.5],hard:[0,1],press:6,
+   adv:'HIGH ALERT: Epinephrine infusion. Verify concentration (16 mcg/mL) with a second RN.'}),
+ mk({id:'amio',s:'Amiodarone',l:'Amiodarone HCl',cat:'Cardiac',u:'IE',pr:'AP',
+   c:[[450,'mg',250]],du:'mg/min',soft:[0.5,1],hard:[0,2],load:{u:'mg',max:300},
+   adv:'Amiodarone: use non-PVC tubing and in-line filter where required. Loading dose usually 150 mg over 10 min.'}),
+ mk({id:'labet',s:'Labetalol',l:'Labetalol HCl',cat:'Cardiac',u:'IEO',pr:'A',
+   c:[[200,'mg',40]],du:'mg/min',soft:[0.5,2],hard:[0,3]}),
+ mk({id:'metop',s:'Metoprolol',l:'Metoprolol Tartrate',cat:'Cardiac',u:'IEO',pr:'A',m:'D',role:'S',
+   c:[[5,'mg',5]],dot:{u:'mg',time:[2,10,1,60],dose:[2.5,5,0,10]}}),
+ mk({id:'hep',s:'Heparin',l:'Heparin Sodium',cat:'Anticoagulant',u:'IME',pr:'AP',dec:0,
+   c:[[25000,'units',250]],du:'units/h',soft:[500,1800],hard:[0,2000],
+   adv:'HIGH ALERT: Anticoagulant. Verify concentration (100 units/mL) and aPTT protocol with a second RN. Hard limit 2000 units/h.'}),
+ mk({id:'tpa',s:'Alteplase tPA',l:'Alteplase (tPA)',cat:'Anticoagulant',u:'IE',pr:'A',
+   c:[[100,'mg',100]],du:'mg/h',soft:[1,90],hard:[0,100],
+   adv:'HIGH ALERT: Thrombolytic. Independent double-check of dose, weight and rate required before starting.'}),
+ mk({id:'vanc',s:'Vancomycin',l:'Vancomycin HCl',cat:'Antimicrobial',u:'IMEN',pr:'AP',m:'D',role:'S',
+   c:[[500,'mg',100],[1000,'mg',250]],dot:{u:'mg',time:[60,90,30,240],dose:[250,2000,0,3000]}}),
+ mk({id:'cefaz',s:'Cefazolin',l:'Cefazolin Sodium',cat:'Antimicrobial',u:'IMEO',pr:'AP',m:'D',role:'S',
+   c:[[2,'g',50]],dot:{u:'g',time:[15,60,5,120],dose:[1,2,0,3]}}),
+ mk({id:'oxy',s:'Oxytocin',l:'Oxytocin (Pitocin)',cat:'OB',u:'ME',pr:'A',
+   c:[[10,'units',1000]],du:'mU/min',soft:[1,20],hard:[0,40],
+   adv:'HIGH ALERT: Oxytocin. Continuous fetal monitoring required. Verify concentration (10 mU/mL).'}),
+ mk({id:'mg',s:'Magnesium Sulf',l:'Magnesium Sulfate',cat:'Electrolyte',u:'IMEO',pr:'AP',m:'CD',
+   c:[[2,'g',50],[20,'g',500]],du:'g/h',soft:[0.5,3],hard:[0,6],load:{u:'g',max:6},
+   dot:{u:'g',time:[15,60,5,240],dose:[1,4,0,6]},
+   adv:'HIGH ALERT: Magnesium sulfate. Monitor reflexes, respirations and serum levels.'}),
+ mk({id:'kcl',s:'Potassium Chl',l:'Potassium Chloride',cat:'Electrolyte',u:'IM',pr:'AP',m:'D',role:'S',
+   c:[[40,'mEq',100],[20,'mEq',100]],dot:{u:'mEq',time:[60,240,10,720],dose:[10,40,0,80],maxPerHour:10},
+   adv:'HIGH ALERT: Potassium chloride. Max rate 10 mEq/h (hard limit). Never give undiluted or as a bolus.'}),
+ mk({id:'ins',s:'Insulin Reg',l:'Insulin Regular',cat:'Endocrine',u:'IME',pr:'AP',dec:1,
+   c:[[100,'units',100]],du:'units/h',soft:[0.5,10],hard:[0,20],
+   adv:'HIGH ALERT: Insulin infusion. Verify concentration (1 unit/mL) and glucose protocol with a second RN.'}),
+ mk({id:'ns',s:'Normal Saline',l:'Sodium Chloride 0.9%',cat:'Fluids',u:'IMENO',pr:'APN',
+   du:'mL/h',soft:[10,250],hard:[0,999]}),
+ mk({id:'lr',s:"Lactated Ringer's",l:"Lactated Ringer's",cat:'Fluids',u:'IMENO',pr:'APN',
+   du:'mL/h',soft:[10,250],hard:[0,999]}),
+ mk({id:'d5w',s:'Dextrose 5%W',l:'Dextrose 5% in Water',cat:'Fluids',u:'IMENO',pr:'APN',
+   du:'mL/h',soft:[10,250],hard:[0,999]}),
+ mk({id:'alb',s:'Albumin 5%',l:'Albumin 5% 250 mL',cat:'Fluids',u:'IME',pr:'AP',
+   du:'mL/h',soft:[10,250],hard:[0,500]}),
+ mk({id:'prbc',s:'Blood (pRBC)',l:'Packed Red Blood Cells',cat:'Blood/Nutrition',u:'IMEO',pr:'AP',
+   du:'mL/h',soft:[50,200],hard:[0,300],
+   adv:'BLOOD PRODUCT: Two-RN verification of patient ID, product and expiry at bedside. Use blood tubing with filter.'}),
+ mk({id:'tpn',s:'TPN',l:'Total Parenteral Nutrition',cat:'Blood/Nutrition',u:'IMN',pr:'APN',
+   du:'mL/h',soft:[20,150],hard:[0,300],
+   adv:'TPN: Verify solution with order and lab values. Use dedicated line and in-line filter. Do not interrupt abruptly.'}),
+ mk({id:'prop',s:'Propofol',l:'Propofol 1%',cat:'Sedation',u:'IO',pr:'A',
+   c:[[200,'mg',20]],du:'mcg/kg/min',soft:[5,50],hard:[0,100],
+   adv:'HIGH ALERT: Propofol. Change tubing every 12 h. Monitor triglycerides and hemodynamics.'}),
+ mk({id:'dex',s:'Dexmedetomidine',l:'Dexmedetomidine',cat:'Sedation',u:'IO',pr:'A',
+   c:[[200,'mcg',2],[400,'mcg',100]],du:'mcg/kg/h',soft:[0.2,1.4],hard:[0,2]}),
+ mk({id:'mida',s:'Midazolam',l:'Midazolam HCl',cat:'Sedation',u:'IEN',pr:'APN',
+   c:[[50,'mg',50]],du:'mcg/kg/h',soft:[20,100],hard:[0,300]}),
+ mk({id:'ond',s:'Ondansetron',l:'Ondansetron HCl',cat:'GI',u:'IMEO',pr:'AP',m:'D',role:'S',
+   c:[[8,'mg',100]],dot:{u:'mg',time:[15,30,5,60],dose:[4,8,0,16]}}),
+ mk({id:'panto',s:'Pantoprazole',l:'Pantoprazole Sodium',cat:'GI',u:'IM',pr:'A',m:'D',role:'S',
+   c:[[40,'mg',100]],dot:{u:'mg',time:[15,30,2,120],dose:[40,80,0,80]}}),
+ mk({id:'furo',s:'Furosemide',l:'Furosemide',cat:'Diuretic',u:'IME',pr:'AP',
+   c:[[100,'mg',100]],du:'mg/h',soft:[5,40],hard:[0,80]}),
+];
+DRUGS.sort((a,b)=>a.s.localeCompare(b.s));
+
+const ADVISORY_BASIC = 'Programming outside the drug library. NO safety limits are applied.';
+
+/* Alarm catalogue used by the "simulate fault" panel */
+const FAULTS = [
+  {t:'op',msg:'Downstream occlusion',sub:'Check line/clamps downstream of pump. Relieve pressure.'},
+  {t:'op',msg:'Upstream occlusion - above pump',sub:'Check clamp, bag, drip chamber and filter.'},
+  {t:'op',msg:'Air bubble alarm',sub:'Open door, remove air, re-insert line.'},
+  {t:'op',msg:'Accumulated air exceeds limit',sub:'Open door, purge air, re-insert line.'},
+  {t:'op',msg:'Drive blocked',sub:'Open door, check line. Contact biomed if persists.'},
+  {t:'op',msg:'Battery cover removed',sub:'Reseat battery cover.'},
+  {t:'op',msg:'No battery inserted',sub:'Insert battery or connect AC power.'},
+  {t:'op',msg:'Danger of FreeFlow - Clamp IV line',sub:'Clamp line. Anti-free-flow clip not engaged.'},
+  {t:'op',msg:'Battery empty',sub:'Connect to AC power immediately.'},
+  {t:'op',msg:'KVO time finished',sub:'Press OK. Reprogram or remove line.'},
+  {t:'op',msg:'Standby time expired',sub:'Press OK to continue.'},
+  {t:'op',msg:'VTBI infused',sub:'Press OK to acknowledge.'},
+  {t:'op',msg:'Time expired',sub:'Press OK to acknowledge.'},
+  {t:'op',msg:'Data lock',sub:'Unauthorized access attempt.'},
+  {t:'pre',msg:'VTBI near end',sub:'Infusion continues. Press OK.'},
+  {t:'pre',msg:'Time near end',sub:'Infusion continues. Press OK.'},
+  {t:'pre',msg:'Battery nearly empty',sub:'Connect to AC power.'},
+  {t:'rem',msg:'Programming not done',sub:'Line inserted but not infusing. Press OK.'},
+  {t:'rem',msg:'Value not confirmed',sub:'Press OK, then confirm the value with OK.'},
+  {t:'rem',msg:'BOLUS NOT running',sub:'Bolus programmed. Press BOL to start.'},
+  {t:'rem',msg:'Order still pending',sub:'Accept or reject auto-program order.'},
+  {t:'dev',msg:'DEVICE ALARM',code:'E-24',sub:'Internal error. Press ON/OFF to restart.'},
+];
+/* ===================================================================
+   CORE — state, calculations, limits, sound, alarms, simulation tick
+   =================================================================== */
+'use strict';
+const KVO_RATE = 1;          // mL/h
+const KVO_SECONDS = 3600;    // sim seconds
+const STORE_KEY = 'mgill-pump-v1';
+const eps = 1e-9;
+
+const S = {
+  power:'off',               // off | boot | on
+  door:'closed', line:false, clamp:true, clip:true,
+  ui:null, stack:[],
+  inf:{PRIM:null,SEC:null}, cur:'PRIM', act:'PRIM',
+  run:'stopped',             // stopped | infusing | kvo | standby
+  phase:null,                // null | LOAD | BOLUS
+  bol:null, man:null, bolPending:null, order:null,
+  secMode:'auto', fullLib:false, newLine:false, prevSec:[], totals:{prim:0,sec:0}, volTotal:0,
+  unit:null, profile:null,
+  set:{vol:5,kvo:false,bolusRate:1000,down:5,up:5,contrast:5,light:7,keyLight:5,macro:false,
+       wireless:true,lock:0,lockCode:'9119',dtOffset:0,bolTone:false},
+  batt:100, ac:false, speed:1,
+  alarms:[], toast:null, toastT:0,
+  lastAct:Date.now(), remFlag:{}, unlockedUntil:0, lockFails:0,
+  lastBolus:null, last:null, kvoLeft:0, standby:null, statusIdx:0, tickAcc:0,
+  homeI:{PRIM:0,SEC:0}, log:[], bolusSeq:0
+};
+
+/* ---------- small helpers ---------- */
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const pad=(n,w=2)=>String(n).padStart(w,'0');
+function fmtRate(r){ if(!isFinite(r)) return '--'; return r<10?r.toFixed(2):r<100?r.toFixed(1):r.toFixed(0); }
+function fmtVol(v){ if(!isFinite(v)) return '--'; return v<100?v.toFixed(1):v.toFixed(0); }
+function fmtNum(v,d){ return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d); }
+function fmtHML(min){ min=Math.max(0,Math.round(min)); const h=Math.floor(min/60),m=min%60; return h&&m?h+'h'+pad(m)+'min':h?h+'h':m+' min'; }
+function fmtDate(){ const d=now(); return pad(d.getMonth()+1)+'/'+pad(d.getDate())+'/'+d.getFullYear(); }
+function fmtHM(min){ min=Math.max(0,Math.round(min)); return Math.floor(min/60)+':'+pad(min%60); }
+function fmtHMS(sec){ sec=Math.max(0,Math.round(sec)); return Math.floor(sec/3600)+':'+pad(Math.floor(sec/60)%60)+':'+pad(sec%60); }
+function roundRate(x){ return x<10?Math.round(x*100)/100:x<100?Math.round(x*10)/10:Math.round(x); }
+function now(){ return new Date(Date.now()+S.set.dtOffset); }
+function ev(type,data){ data=data||{}; S.log.push({type,data,t:Date.now()}); if(typeof exam!=='undefined'&&exam&&exam.ev) exam.ev(type,data); }
+
+/* ---------- drug math ---------- */
+function parseDU(du){ const p=du.split('/'); return {amt:p[0],per:p.length===3?p[1]:null,t:p[p.length-1]}; }
+function concOf(inf){ return inf&&inf.drug&&inf.drug.c?inf.drug.c[inf.concIdx||0]:null; }
+function cpm(inf,amtUnit){ const c=concOf(inf); if(!c) return null; return c[0]*FACTOR[c[1]]/FACTOR[amtUnit]/c[2]; }
+function hasDose(inf){ return !!(inf&&inf.drug&&inf.drug.du&&inf.drug.du!=='mL/h'&&inf.mode==='C'); }
+function needsWeight(inf){ return !!(inf&&inf.drug&&inf.drug.du&&inf.mode==='C'&&inf.drug.du.indexOf('/kg')>=0); }
+function d2r(inf,d){ const u=parseDU(inf.drug.du); const w=u.per?(inf.weight||0):1; return d*w*(u.t==='min'?60:1)/cpm(inf,u.amt); }
+function r2d(inf,r){ const u=parseDU(inf.drug.du); const w=u.per?(inf.weight||0):1; if(!w) return 0; return r*cpm(inf,u.amt)/(w*(u.t==='min'?60:1)); }
+function doseUnitLabel(inf){ return inf.mode==='D'?inf.drug.dot.u:(inf.drug&&inf.drug.du)||'mL/h'; }
+function drugName(inf){ return inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.s; }
+
+function newInf(kind,drug,ctx){
+  return {kind,drug:drug||null,ctx,concIdx:0,mode:(drug&&drug.m[0])||'C',unit:S.unit,profile:S.profile,weight:0,
+    rate:0,vtbi:0,time:0,doserate:0,dose:0,dotTime:0,calc:'time',set:[],target:null,
+    vol:0,elapsed:0,vtbi0:0,time0:0,lim:false,pa:{},load:null,ovr:false};
+}
+
+function recalc(inf,ed){
+  if(inf.mode==='D'){
+    const c=cpm(inf,inf.drug.dot.u);
+    inf.vtbi=Math.round(inf.dose/c*10)/10;
+    inf.rate=inf.dotTime>0?roundRate(inf.vtbi/(inf.dotTime/60)):0;
+    inf.time=inf.dotTime; return;
+  }
+  if(inf.kind==='basic'){
+    if(ed && ['rate','vtbi','time'].indexOf(ed)>=0){
+      if(inf.set.indexOf(ed)<0){
+        inf.set.push(ed);
+        if(inf.set.length>2){
+          const drop=inf.set.find(x=>x!==inf.target&&x!==ed);
+          inf.set.splice(inf.set.indexOf(drop),1);
+        }
+      }
+      if(!inf.target) inf.target=inf.set[0];
+    }
+    if(inf.set.length===2){
+      const c=['rate','vtbi','time'].find(x=>inf.set.indexOf(x)<0);
+      if(c==='time') inf.time=inf.rate>0?inf.vtbi/inf.rate*60:0;
+      else if(c==='vtbi') inf.vtbi=Math.round(inf.rate*inf.time/60*10)/10;
+      else inf.rate=inf.time>0?roundRate(inf.vtbi/inf.time*60):0;
+    }
+    return;
+  }
+  if(hasDose(inf)){
+    if(ed==='doserate') inf.rate=roundRate(d2r(inf,inf.doserate));
+    else if(ed==='rate') inf.doserate=r2d(inf,inf.rate);
+  }
+  if(ed==='vtbi') inf.calc='time';
+  if(ed==='time') inf.calc='vtbi';
+  if(inf.calc==='time') inf.time=(inf.rate>0&&inf.vtbi>0)?inf.vtbi/inf.rate*60:0;
+  else inf.vtbi=Math.round(inf.rate*inf.time/60*10)/10;
+}
+
+function setField(inf,f,v){
+  inf[f]=v;
+  recalc(inf,f);
+  if(f==='vtbi'||f==='time'||f==='dose'||f==='dotTime'){ inf.vtbi0=inf.vtbi; inf.pa={}; }
+  inf.time0=inf.time;
+  inf.lim=inf.vtbi>0;
+  if(inf.ovr===undefined) inf.ovr=false;
+}
+
+/* ---------- limits (in the field's own units) ---------- */
+function lim(inf,field){
+  if(!inf||inf.kind==='basic'||!inf.drug) return null;
+  const d=inf.drug, um=UNIT_MULT[inf.unit]||[1,1], pm=PROF_MULT[inf.profile]||1, sm=um[0]*pm, hm=um[1]*pm;
+  if(field==='doserate'&&d.soft) return {sl:d.soft[0],sh:d.soft[1]*sm,hl:d.hard[0],hh:d.hard[1]*hm};
+  if(field==='rate'&&d.soft){
+    if(d.du==='mL/h') return {sl:d.soft[0],sh:d.soft[1]*sm,hl:d.hard[0],hh:d.hard[1]*hm};
+    if(hasDose(inf)&&inf.weight>0){
+      const f=x=>roundRate(d2r(inf,x));
+      return {sl:f(d.soft[0]),sh:f(d.soft[1]*sm),hl:f(d.hard[0]),hh:Math.min(1200,f(d.hard[1]*hm))};
+    }
+    return {sl:0,sh:1e9,hl:0,hh:1200};
+  }
+  if(field==='dose'&&d.dot){ const x=d.dot.dose; return {sl:x[0],sh:x[1]*sm,hl:x[2],hh:x[3]*hm}; }
+  if(field==='dotTime'&&d.dot){
+    const x=d.dot.time; let hl=x[2];
+    if(d.dot.maxPerHour&&inf.dose>0) hl=Math.max(hl,inf.dose/d.dot.maxPerHour*60);
+    if(inf.vtbi>0) hl=Math.max(hl,inf.vtbi/999*60);
+    return {sl:x[0],sh:x[1],hl:Math.ceil(hl),hh:x[3]};
+  }
+  if(field==='loaddose'&&d.load) return {sl:0,sh:1e9,hl:0,hh:d.load.max*hm};
+  if(field==='vtbi') return {sl:0,sh:1e9,hl:0,hh:9999};
+  return null;
+}
+function symFor(inf){
+  if(inf&&inf.ivf) return '';
+  if(!inf||inf.kind==='basic') return '[–]';
+  let f,v;
+  if(inf.mode==='D'){ f='dose'; v=inf.dose; }
+  else if(hasDose(inf)){ f='doserate'; v=inf.doserate; }
+  else { f='rate'; v=inf.rate; }
+  const l=lim(inf,f); if(!l||!(v>0)) return '[=]';
+  if(v<l.sl-eps) return v<l.sl/2?'[↓↓]':'[↓]';
+  if(v>l.sh+eps) return v>l.sh*2?'[↑↑]':'[↑]';
+  return '[=]';
+}
+
+/* ===================================================================
+   SOUND (Web Audio only)
+   =================================================================== */
+const snd=(()=>{
+  let ctx=null, timer=null, kind=null;
+  function init(){
+    try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
+    if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+    if(ctx&&ctx.state!=='running'){ try{ctx.resume();}catch(e){} }
+  }
+  const vol=()=>Math.max(0.02,(S.set.vol/9)*0.35);
+  function tone(f,d,type,v,at){
+    if(!ctx) return; type=type||'sine'; v=v==null?1:v; at=at||0;
+    const t=ctx.currentTime+at, o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol()*v,t+0.01);
+    g.gain.setValueAtTime(vol()*v,Math.max(t+0.011,t+d-0.02)); g.gain.linearRampToValueAtTime(0,t+d);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+d+0.03);
+  }
+  const patterns={
+    op:{every:1300,play:()=>{[880,660,880,660].forEach((f,i)=>tone(f,0.16,'square',0.7,i*0.2));}},
+    dev:{every:700,play:()=>{[300,450,300,450].forEach((f,i)=>tone(f,0.09,'sawtooth',0.8,i*0.1));}},
+    pre:{every:2600,play:()=>tone(700,0.28,'sine',0.9)},
+    rem:{every:3600,play:()=>{tone(520,0.14,'sine',0.9);tone(520,0.14,'sine',0.9,0.22);}},
+    kvo:{every:6000,play:()=>tone(440,0.2,'sine',0.35)}
+  };
+  function setAlarm(k){
+    if(k===kind) return; kind=k; clearInterval(timer); timer=null;
+    if(!k||!patterns[k]) return;
+    patterns[k].play(); timer=setInterval(patterns[k].play,patterns[k].every);
+  }
+  return {
+    init, tone, setAlarm,
+    key(){ tone(1500,0.025,'square',0.25); },
+    on(){ tone(660,0.18,'sine',1); tone(990,0.22,'sine',1,0.28); },
+    off(){ tone(990,0.14,'sine',0.8); tone(660,0.2,'sine',0.8,0.2); },
+    ack(){ tone(900,0.1,'sine',0.8); tone(600,0.16,'sine',0.8,0.12); },
+    tick(){ tone(1200,0.03,'sine',0.35); },
+    stop(){ setAlarm(null); }
+  };
+})();
+
+/* ===================================================================
+   ALARMS
+   =================================================================== */
+const PRI={dev:0,op:1,pre:2,rem:3};
+let aid=0;
+function raise(type,msg,sub,o){
+  o=o||{};
+  if(S.alarms.some(a=>a.msg===msg)) return;
+  S.alarms.push({id:++aid,type,msg,sub:sub||'',code:o.code,t0:performance.now(),onAck:o.onAck});
+  S.alarms.sort((a,b)=>PRI[a.type]-PRI[b.type]||a.id-b.id);
+  if(type==='op'||type==='dev') haltInfusion();
+  ev('alarm',{msg,type});
+  syncSound(); if(typeof draw==='function') draw();
+}
+function haltInfusion(){
+  if(S.run==='infusing'||S.run==='kvo') S.run='stopped';
+  if(S.man) endManual(true);
+}
+function ackAlarm(){
+  const a=S.alarms[0]; if(!a||a.type==='dev') return;
+  S.alarms.shift(); snd.ack(); syncSound();
+  ev('ack',{msg:a.msg,type:a.type});
+  if(a.onAck) a.onAck();
+  if(typeof draw==='function') draw();
+}
+function clearAlarms(){ S.alarms=[]; syncSound(); }
+function syncSound(){
+  if(S.power!=='on'){ snd.setAlarm(null); return; }
+  const t=S.alarms.length?S.alarms[0].type:null;
+  if(t) snd.setAlarm(t);
+  else if(S.run==='kvo') snd.setAlarm('kvo');
+  else snd.setAlarm(null);
+}
+
+/* ===================================================================
+   RUN / SIMULATION
+   =================================================================== */
+function activeInf(){ return S.inf[S.act]; }
+function programmedOK(inf){
+  if(!inf) return false;
+  if(inf.mode==='D') return inf.dose>0&&inf.dotTime>0;
+  return inf.rate>0;
+}
+function lineReady(){
+  if(!S.line||S.door!=='closed'){ toast('Insert IV line and close door'); return false; }
+  return true;
+}
+function toast(t,ms){ S.toast=t; S.toastT=Date.now()+(ms||2600); if(typeof draw==='function') draw(); }
+
+function account(vol){
+  S.totals[S.act==='PRIM'?'prim':'sec']+=vol; S.volTotal+=vol;
+  const inf=activeInf(); if(inf) inf.vol+=vol;
+}
+
+function infuse(dt){
+  const inf=activeInf();
+  if(!inf){ S.run='stopped'; return; }
+  if(S.phase==='BOLUS'&&S.bol){
+    let v=Math.min(S.bol.rate*dt/3600,S.bol.vol-S.bol.done);
+    S.bol.done+=v; account(v); tickTone(v);
+    if(S.bol.done>=S.bol.vol-1e-9) endBolus();
+    return;
+  }
+  if(S.phase==='LOAD'&&inf.load){
+    let v=Math.min(inf.load.rate*dt/3600,inf.load.vol-inf.load.done);
+    inf.load.done+=v; account(v);
+    if(inf.load.done>=inf.load.vol-1e-9){ S.phase=null; inf.load.finished=true; toast('Loading dose complete - continuing'); ev('loaddone'); }
+    return;
+  }
+  if(S.run==='kvo'){
+    account(KVO_RATE*dt/3600); S.kvoLeft-=dt;
+    if(S.kvoLeft<=0){ S.run='stopped'; raise('op','KVO time finished','Press OK. Reprogram or remove IV line.'); }
+    return;
+  }
+  let v=inf.rate*dt/3600;
+  if(inf.lim) v=Math.min(v,inf.vtbi);
+  account(v); inf.elapsed+=dt;
+  if(inf.lim){
+    inf.vtbi=Math.max(0,inf.vtbi-v);
+    inf.time=inf.rate>0?inf.vtbi/inf.rate*60:0;
+    if(inf.vtbi0>0&&!inf.pa.v&&inf.vtbi>0&&inf.vtbi/inf.vtbi0<0.1){ inf.pa.v=true; raise('pre','VTBI near end','Infusion continues. Press OK.'); }
+    if(inf.time0>=10&&!inf.pa.t&&inf.vtbi>0&&inf.time<5){ inf.pa.t=true; raise('pre','Time near end','Infusion continues. Press OK.'); }
+    if(inf.vtbi<=eps) vtbiEnd(inf);
+  }
+}
+function tickTone(v){
+  S.tickAcc+=v; if(S.tickAcc>=1){ S.tickAcc-=1; if(S.set.bolTone||S.phase==='BOLUS') snd.tick(); }
+}
+function vtbiEnd(inf){
+  inf.vtbi=0; inf.time=0;
+  ev('vtbiend',{ctx:S.act});
+  if(S.act==='SEC') return secDone();
+  if(S.set.kvo&&inf.mode!=='D'){
+    S.run='kvo'; S.kvoLeft=KVO_SECONDS;
+    raise('pre','KVO mode','VTBI complete. Keep-vein-open rate '+KVO_RATE+' mL/h. Press OK.');
+  } else {
+    S.run='stopped';
+    raise('op','VTBI infused','Press OK to acknowledge.',{onAck:()=>toBase()});
+  }
+}
+function secDone(){
+  const sec=S.inf.SEC;
+  pushPrevSec(sec);
+  if(S.secMode==='auto'&&S.inf.PRIM){
+    S.act='PRIM'; S.cur='PRIM'; S.inf.SEC=null;
+    toast('SEC infused - back to PRIM');
+    if(S.inf.PRIM.rate>0){ S.run='infusing'; } else S.run='stopped';
+    toBase();
+  } else {
+    S.run='stopped';
+    raise('op','SEC VTBI infused','Press OK. Then Resume PRIMary from the menu.',{onAck:()=>{
+      S.cur='SEC'; S.homeI.SEC=99; toBase(); }});
+  }
+}
+function pushPrevSec(sec){
+  if(!sec) return;
+  const copy=JSON.parse(JSON.stringify(packInf(sec)));
+  copy.vol=0; copy.elapsed=0; copy.load=null;
+  S.prevSec=S.prevSec.filter(p=>!(p.drugId===copy.drugId&&p.dose===copy.dose&&p.rate===copy.rate&&p.dotTime===copy.dotTime));
+  S.prevSec.unshift(copy); S.prevSec=S.prevSec.slice(0,5);
+}
+
+function startInfusion(){
+  const inf=S.inf[S.cur];
+  if(!inf||!programmedOK(inf)) return;
+  if(!lineReady()) return;
+  if(S.alarms.length) return;
+  S.act=S.cur; S.run='infusing';
+  if(!(S.phase==='BOLUS'&&S.bol)){
+    if(inf.load&&!inf.load.finished&&!inf.load.cancelled&&inf.load.done<inf.load.vol-eps) S.phase='LOAD'; else S.phase=null;
+  }
+  if(inf.vtbi0<=0||inf.vtbi>inf.vtbi0) inf.vtbi0=inf.vtbi;
+  inf.lim=inf.vtbi>0;
+  S.clampT=0;
+  ev('start',{ctx:S.act,phase:S.phase});
+  save(); toBase();
+}
+function stopInfusion(){
+  const was=S.run;
+  S.run='stopped';
+  ev('stop',{ctx:S.act});
+  const inf=activeInf();
+  if(S.phase==='LOAD'&&inf&&inf.load&&inf.load.done<inf.load.vol-eps){
+    go('yesno',{title:'LOADING DOSE STOPPED',lines:['Deliver remaining loading dose?','','▲ = YES (deliver)','▼ = NO (cancel loading dose)'],
+      yes:()=>{ toBase(); }, no:()=>{ inf.load.cancelled=true; S.phase=null; ev('loadcancel'); toBase(); }});
+    return;
+  }
+  save();
+  if(was!=='stopped') toBase();
+}
+
+/* manual bolus */
+function startManual(){
+  const inf=S.inf[S.cur]||S.inf.PRIM;
+  if(!inf){ toast('No infusion programmed'); return false; }
+  if(inf.mode==='D'){ toast('Function Disabled'); return false; }
+  if(!S.line||S.door!=='closed'){ toast('Insert IV line first'); return false; }
+  if(S.phase==='BOLUS'){ return false; }
+  S.man={t:0,vol:0,live:true,bucket:0};
+  ev('bolus-start',{kind:'manual'});
+  return true;
+}
+function endManual(silent){
+  if(!S.man) return;
+  const m=S.man; S.man=null;
+  S.lastBolus={dose:m.vol,unit:'mL',date:now().toLocaleString()};
+  S.totals[S.act==='SEC'?'sec':'prim']+=m.vol; S.volTotal+=m.vol;
+  ev('bolus-end',{kind:'manual',vol:m.vol});
+  if(!silent&&S.power==='on'){
+    go('msg',{title:'MANUAL BOLUS',lines:['Bolus delivered:',fmtNum(m.vol,2)+' mL'],ok:()=>toBase()});
+  }
+}
+function endBolus(){
+  const b=S.bol; S.bol=null; S.phase=null;
+  S.lastBolus={dose:b.dose,unit:b.unit,date:now().toLocaleString()};
+  ev('bolus-end',{kind:'prog',dose:b.dose});
+  toast('Bolus complete - back to continuous',3500);
+}
+
+function endManualTick(dtr){
+  const m=S.man; if(!m) return;
+  m.t+=dtr;
+  const v=S.set.bolusRate*dtr/3600;
+  m.vol+=v; m.bucket+=v;
+  if(m.bucket>=1){ m.bucket-=1; if(S.set.bolTone) snd.tick(); }
+  if(m.t>=10) endManual();
+}
+
+/* ---------- main tick ---------- */
+let lastTickT=performance.now();
+function tick(){
+  const t=performance.now(); const dtr=Math.min(120,(t-lastTickT)/1000); lastTickT=t;
+  if(S.power!=='on') return;
+  const dt=dtr*S.speed;
+  // battery
+  if(S.ac){ S.batt=Math.min(100,S.batt+25*dt/3600); if(S.batt>25) S.remFlag.batt=false; }
+  else {
+    const a=activeInf(); const r=(S.run==='infusing'&&a)?a.rate:0;
+    S.batt-=((S.run==='stopped'?3:5+r*0.006))*dt/3600;
+    if(S.batt<20&&!S.remFlag.batt){ S.remFlag.batt=true; raise('pre','Battery nearly empty','Connect to AC power.'); }
+    if(S.batt<=0){ S.batt=0; raise('op','Battery empty','Connect to AC power.',{onAck:()=>powerOff(true)}); }
+  }
+  // infusion
+  if((S.run==='infusing'||S.run==='kvo')&&!S.alarms.some(a=>a.type==='op'||a.type==='dev')) {
+    infuse(dt);
+    // upstream occlusion if clamp closed
+    if(S.run==='infusing'&&!S.clamp){ S.clampT=(S.clampT||0)+dtr; if(S.clampT>8){ S.clampT=0; raise('op','Upstream occlusion - above pump','Check roller clamp, bag and drip chamber.'); } }
+  } else if(S.run==='standby'&&S.standby){
+    S.standby.left-=dt;
+    if(S.standby.left<=0){ S.standby=null; S.run='stopped'; raise('op','Standby time expired','Press OK to continue.',{onAck:()=>toBase()}); }
+  }
+  if(S.man) endManualTick(dtr);
+  // reminders (real time)
+  const ms=Date.now();
+  const noAlarm=S.alarms.length===0;
+  const anyInf=S.inf.PRIM||S.inf.SEC;
+  if(noAlarm&&S.line&&anyInf&&S.run==='stopped'&&ms-S.lastAct>120000&&!S.remFlag.prog){
+    S.remFlag.prog=true; raise('rem','Programming not done','Line inserted but not infusing. Press OK.');
+  }
+  if(S.ui&&S.ui.id==='editor'&&noAlarm&&ms-(S.ui.t0||ms)>20000){ S.ui.t0=ms; raise('rem','Value not confirmed','Press OK, then confirm the value with OK.'); }
+  if(S.bolPending&&noAlarm&&ms-S.bolPending>60000){ S.bolPending=ms; raise('rem','BOLUS NOT running','Bolus programmed. Press BOL to start.'); }
+  if(S.order&&noAlarm&&ms-S.order.t0>60000&&!S.order.warned){ S.order.warned=true; raise('rem','Order still pending','Accept or reject auto-program order.'); }
+  // escalation
+  S.alarms.forEach(a=>{
+    if(a.type==='pre'&&a.msg!=='KVO mode'&&(performance.now()-a.t0)*S.speed>180000){
+      S.alarms=S.alarms.filter(x=>x!==a);
+      raise('op',a.msg+' - not acknowledged',a.sub);
+    }
+  });
+  // toast expiry
+  if(S.toast&&Date.now()>S.toastT){ S.toast=null; }
+}
+
+/* ===================================================================
+   POWER
+   =================================================================== */
+function powerOff(force){
+  snd.setAlarm(null); snd.off(); save();
+  S.power='off'; S.run='stopped'; S.phase=null; S.man=null; S.bol=null; S.alarms=[]; S.ui=null; S.stack=[];
+  S.standby=null; S.toast=null;
+  ev('poweroff');
+  if(typeof draw==='function') draw();
+}
+
+/* ===================================================================
+   PERSISTENCE
+   =================================================================== */
+function packInf(inf){
+  if(!inf) return null;
+  const o=Object.assign({},inf); o.drugId=inf.drug?inf.drug.id:null; delete o.drug; return o;
+}
+function unpackInf(o){
+  if(!o) return null;
+  const inf=Object.assign({},o); inf.drug=o.drugId?DRUGS.find(d=>d.id===o.drugId):null; delete inf.drugId;
+  if(inf.kind==='lib'&&!inf.drug) return null;
+  return inf;
+}
+function save(){
+  try{
+    if(S.inf.PRIM) S.last={PRIM:packInf(S.inf.PRIM),SEC:packInf(S.inf.SEC),unit:S.unit,profile:S.profile};
+    localStorage.setItem(STORE_KEY,JSON.stringify({
+      last:S.last,secMode:S.secMode,prevSec:S.prevSec,totals:S.totals,set:S.set,batt:S.batt,lastBolus:S.lastBolus,
+      unit:S.unit,profile:S.profile
+    }));
+  }catch(e){}
+}
+function loadStore(){
+  try{
+    const o=JSON.parse(localStorage.getItem(STORE_KEY)||'null'); if(!o) return;
+    if(o.set) Object.assign(S.set,o.set);
+    S.secMode=o.secMode||'auto'; S.prevSec=o.prevSec||[]; S.totals=o.totals||S.totals;
+    S.batt=typeof o.batt==='number'?o.batt:100; S.last=o.last||null; S.lastBolus=o.lastBolus||null;
+  }catch(e){}
+}
+/* ===================================================================
+   SCREENS — navigation + every workflow
+   A screen = {r(u)->view, k(key,u)->consumed?, modal?}
+   view = {tl,tc,tr,rows:[{t,r,h,hl,dim,cls}],bot}
+   =================================================================== */
+'use strict';
+const SC={};
+const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function wrap(text,n){
+  n=n||34; const out=[]; let line='';
+  String(text).split(' ').forEach(w=>{ if((line+' '+w).trim().length>n){ out.push(line.trim()); line=w; } else line+=' '+w; });
+  if(line.trim()) out.push(line.trim()); return out;
+}
+
+/* ---------- navigation ---------- */
+function go(id,ctx){ if(S.ui) S.stack.push(S.ui); S.ui=Object.assign({id,t0:Date.now()},ctx||{}); draw(); }
+function rep(id,ctx){ S.ui=Object.assign({id,t0:Date.now()},ctx||{}); draw(); }
+function back(n){ n=n||1; let u=null; for(let i=0;i<n;i++) u=S.stack.pop(); S.ui=u||baseUi(); draw(); }
+function baseUi(){
+  if(S.run==='standby'&&S.standby) return {id:'standby'};
+  if(!S.inf.PRIM&&!S.inf.SEC) return {id:'landing'};
+  if((S.run==='infusing'||S.run==='kvo')) return {id:'run'};
+  return {id:'home'};
+}
+function toBase(){ S.stack=[]; S.ui=Object.assign({t0:Date.now()},baseUi()); draw(); }
+function seq(steps,done){ let i=0; const next=()=>{ if(i<steps.length) steps[i++](next); else done(); }; next(); }
+
+/* ---------- generic screens ---------- */
+SC.list={
+  r(u){
+    const N=7; if(u.i<u.top) u.top=u.i; if(u.i>=u.top+N) u.top=u.i-N+1;
+    const rows=[{t:u.title,cls:'hd'}].concat(u.items.slice(u.top,u.top+N).map((it,j)=>({t:it.t,r:it.r,hl:u.top+j===u.i,dim:it.dim})));
+    return {tl:u.tl||'',tr:u.tr||'',tc:(u.top>0?'▲':'')+(u.top+N<u.items.length?'▼':''),rows,bot:u.bot||(u.alpha?'▲▼ scroll  ◀▶ skip 3 letters  OK select':'▲▼ scroll    OK select    C back')};
+  },
+  k(k,u){
+    const n=u.items.length;
+    if(k==='u'){ u.i=Math.max(0,u.i-1); return true; }
+    if(k==='d'){ u.i=Math.min(n-1,u.i+1); return true; }
+    if(u.alpha&&(k==='l'||k==='r')){
+      const ch=c=>(u.items[c].key||u.items[c].t||'?')[0].toUpperCase().charCodeAt(0);
+      const base=ch(u.i);
+      if(k==='r'){ let j=u.i; while(j<n-1&&ch(j)<base+3) j++; u.i=j; }
+      else { let j=u.i; while(j>0&&ch(j)>base-3) j--; u.i=j; }
+      return true;
+    }
+    if(k==='K'||(k==='l'&&!u.alpha)){ const it=u.items[u.i]; if(it){ if(it.act) it.act(it,u.i); else if(u.onSel) u.onSel(it,u.i); } return true; }
+    if(k==='C'){ if(u.onBack) u.onBack(); else back(); return true; }
+    return k==='r';
+  }
+};
+function listUi(title,items,o){ return Object.assign({title,items,i:0,top:0},o||{}); }
+
+SC.yesno={
+  modal:true,
+  r(u){ return {tl:u.tl||'',rows:[{t:u.title,cls:'hd'}].concat((u.lines||[]).map(t=>({t}))),bot:u.bot||'▲ = YES      ▼ = NO'}; },
+  k(k,u){
+    if(k==='u'){ if(u.yes) u.yes(); return true; }
+    if(k==='d'||k==='C'){ if(u.no) u.no(); else back(); return true; }
+    return true;
+  }
+};
+SC.msg={
+  modal:true,
+  r(u){ return {tl:u.tl||'',rows:[{t:u.title,cls:u.cls||'hd'}].concat((u.lines||[]).map(t=>({t}))),bot:u.bot||'OK = confirm'}; },
+  k(k,u){
+    if(k==='K'){ if(u.ok) u.ok(); else back(); return true; }
+    if(k==='C'){ if(u.cancel) u.cancel(); else back(); return true; }
+    return true;
+  }
+};
+
+/* ---------- value editor (KeyGuard) ---------- */
+function edit(o){
+  const dec=o.time?0:(o.dec==null?1:o.dec);
+  const int=o.int||4;
+  const steps=o.time?[1,10,60,600]:Array.from({length:dec+int},(_,i)=>Math.pow(10,i));
+  const scale=Math.pow(10,dec);
+  const hardMax=o.hh!=null?o.hh:1e9;
+  const maxIv=o.time?Math.min(Math.round(hardMax),5999):Math.min(Math.round(hardMax*scale),Math.pow(10,int+dec)-1);
+  const iv=Math.round((o.val||0)*scale);
+  const u={label:o.label,unit:o.unit||'',dec,int,steps,scale,time:!!o.time,ci:o.time?0:dec+(o.pos||0),
+    iv,conf:iv,hl:o.hl,hh:o.hh,sl:o.sl,sh:o.sh,maxIv,hs:0,note:null,calc:o.calc,onOk:o.onOk,field:o.field};
+  go('editor',u);
+}
+function edVal(u){ return u.iv/u.scale; }
+function edFormat(u,iv){
+  if(u.time){ const h=Math.floor(iv/60),m=iv%60; return [pad(h),pad(m)]; }
+  const s=String(iv).padStart(u.int+u.dec,'0'); return [s.slice(0,u.int),s.slice(u.int)];
+}
+function edDigits(u){
+  // returns html of digits with active highlighted
+  const parts=edFormat(u,u.iv); const chars=[];
+  const all=parts[0]+parts[1]; const n=all.length;
+  let sig=false;
+  for(let j=0;j<n;j++){
+    const stepIdx=n-1-j; const ch=all[j];
+    if(ch!=='0') sig=true;
+    const lead=!sig&&j<parts[0].length-1&&!u.time;
+    const sepBefore=(j===parts[0].length&&(u.time||u.dec>0))?(u.time?':':'.'):'';
+    if(sepBefore) chars.push('<span class="sep">'+sepBefore+'</span>');
+    chars.push('<span class="dg'+(stepIdx===u.ci?' act':'')+(lead?' lz':'')+'">'+ch+'</span>');
+  }
+  return chars.join('');
+}
+function edFmtLimit(u,v){ return u.time?fmtHM(v):fmtNum(v,u.dec); }
+SC.editor={
+  modal:true,
+  r(u){
+    const v=edVal(u);
+    let rows;
+    if(u.hs===2){
+      rows=[{t:u.label,cls:'hd'},{t:'VALUE EXCEEDS',cls:'warn'},{t:'HARD / DRUG LIMIT',cls:'warn'},{t:'Max: '+edFmtLimit(u,u.maxIv/u.scale)+' '+u.unit},{t:'PRESS OK TO CONFIRM',cls:'warn'}];
+      return {tl:'HARD LIMIT',rows,bot:'OK = confirm (value reverts)'};
+    }
+    if(u.hs===3){
+      rows=[{t:u.label,cls:'hd'},{t:'VALUE BELOW',cls:'warn'},{t:'HARD LIMIT',cls:'warn'},{t:'Min: '+edFmtLimit(u,u.hl)+' '+u.unit},{t:'PRESS OK TO CONFIRM',cls:'warn'}];
+      return {tl:'HARD LIMIT',rows,bot:'OK = confirm'};
+    }
+    let symbol='';
+    if(u.sl!=null&&v>0) symbol=v<u.sl-eps?'[↓]':v>u.sh+eps?'[↑]':'[=]';
+    rows=[{t:u.label,cls:'hd'},{h:'<div class="edbig">'+edDigits(u)+'<span class="edunit">'+esc(u.unit)+'</span></div>'}];
+    if(u.note) rows.push({t:u.note,cls:'warn'});
+    if(u.sl!=null) rows.push({t:'Soft '+edFmtLimit(u,u.sl)+' - '+edFmtLimit(u,u.sh),cls:'dim'});
+    if(u.hh!=null&&u.hh<1e8) rows.push({t:'Hard max '+edFmtLimit(u,u.hh),cls:'dim'});
+    const c=u.calc?u.calc(v):''; if(c) rows.push({t:c,cls:'calc'});
+    return {tl:'EDIT',tc:symbol,rows,bot:'▲▼ digit  ◀▶ move  OK confirm  C clear/back'};
+  },
+  k(k,u){
+    if(u.hs===2||u.hs===3){ if(k==='K'){ if(u.hs===2) u.iv=u.conf; u.hs=0; u.note=null; } return true; }
+    const st=u.steps[u.ci], n=u.steps.length;
+    if(k==='u'){
+      const nv=u.iv+st;
+      if(nv>u.maxIv){ if(u.iv<u.maxIv){ u.iv=u.maxIv; u.note='HARD LIMIT reached'; } else { u.hs=2; ev('hardlimit',{field:u.field}); } }
+      else { u.iv=nv; u.note=null; }
+    } else if(k==='d'){ u.iv=Math.max(0,u.iv-st); u.note=null; }
+    else if(k==='l'){ u.ci=(u.ci+1)%n; }
+    else if(k==='r'){ u.ci=(u.ci+n-1)%n; }
+    else if(k==='C'){ if(u.iv!==0){ u.iv=0; u.note=null; } else back(); }
+    else if(k==='K'){
+      const v=edVal(u);
+      if(u.hl!=null&&v<u.hl-eps){ u.hs=3; return true; }
+      if(u.sl!=null&&v>0&&(v<u.sl-eps||v>u.sh+eps)){
+        const hi=v>u.sh+eps;
+        go('yesno',{title:'SOFT LIMIT',tl:hi?'[↑]':'[↓]',
+          lines:[hi?'Value ABOVE upper soft limit':'Value BELOW lower soft limit','Soft: '+edFmtLimit(u,u.sl)+' - '+edFmtLimit(u,u.sh)+' '+u.unit,'','Override?'],
+          bot:'▲ = YES      ▼ = NO',
+          yes:()=>{ ev('override',{yes:true,field:u.field}); back(2); u.onOk(v,hi?'hi':'lo'); },
+          no:()=>{ ev('override',{yes:false,field:u.field}); back(); }});
+        return true;
+      }
+      back(); u.onOk(v,null);
+    }
+    return true;
+  }
+};
+
+/* ---------- level selector & fields editor ---------- */
+SC.level={
+  modal:true,
+  r(u){
+    const bar=Array.from({length:u.max-u.min+1},(_,i)=>'<span class="lv'+(i+u.min<=u.val?' on':'')+'"></span>').join('');
+    return {rows:[{t:u.title,cls:'hd'},{h:'<div class="edbig">'+u.val+'</div>'},{h:'<div class="lvbar">'+bar+'</div>'},{t:u.fmt?u.fmt(u.val):''}],bot:'◀ lower  ▶ higher  OK confirm  C back'};
+  },
+  k(k,u){
+    if(k==='l'||k==='d'){ u.val=Math.max(u.min,u.val-1); if(u.onChange) u.onChange(u.val); }
+    else if(k==='r'||k==='u'){ u.val=Math.min(u.max,u.val+1); if(u.onChange) u.onChange(u.val); }
+    else if(k==='K'){ back(); u.onOk(u.val); }
+    else if(k==='C') back();
+    return true;
+  }
+};
+SC.fields={
+  modal:true,
+  r(u){
+    const f=u.fields.map((f,i)=>'<span class="fld'+(i===u.i?' act':'')+'">'+pad(f.v,f.w||2)+'</span>'+(f.sep||'')).join('');
+    return {rows:[{t:u.title,cls:'hd'},{h:'<div class="edbig sm">'+f+'</div>'},{t:u.hint||''},{t:u.fields[u.i].lab||'',cls:'dim'}],bot:'▲▼ change  ◀▶ move  OK confirm  C back'};
+  },
+  k(k,u){
+    const f=u.fields[u.i], n=u.fields.length;
+    if(k==='u'){ f.v=f.v>=f.max?f.min:f.v+1; }
+    else if(k==='d'){ f.v=f.v<=f.min?f.max:f.v-1; }
+    else if(k==='l'){ u.i=(u.i+n-1)%n; }
+    else if(k==='r'){ u.i=(u.i+1)%n; }
+    else if(k==='K'){ back(); u.onOk(u.fields.map(x=>x.v)); }
+    else if(k==='C') back();
+    return true;
+  }
+};
+
+/* ---------- boot / landing ---------- */
+SC.boot={ r(u){ return {rows:[{t:''},{t:'Self-test active',cls:'hd'},{t:'Software version '+SW_VERSION},{t:''},{t:'M | Gill Infusion Pump',cls:'dim'}]}; }, k(){return true;} };
+SC.landing={
+  r(u){
+    return {rows:[{h:'<div class="logo">M<span>|</span>GILL</div>'},{t:'Press ⏏ to load IV line or',cls:'dim'},{t:'Press OK to program an infusion',cls:'dim'},{t:''},{h:'<div class="logosub">M | Gill Infusion Pump</div>'}],tl:S.set.wireless?'((•))':'',tr:fmtDate(),bot:S.line?'':'Door key (far right) = load IV line'};
+  },
+  k(k){ if(k==='K'){ startLibrary(); return true; } return false; }
+};
+
+/* ---------- library selection flow ---------- */
+const unitLabel=n=>n==='Med-Surg'?'Med / Surg':n;
+function startLibrary(){
+  S.profile=null; S.unit=null;
+  const items=CARE_UNITS.map(n=>({t:unitLabel(n),act:()=>{ S.unit=n; ev('careunit',{name:n});
+    if(S.fullLib||n==='NICU') pickProfile('PRIM');
+    else { S.profile='Adult'; ev('profile',{name:'Adult'}); herDrugList('PRIM'); } }}));
+  if(S.fullLib) items.push({t:'Basic Infusion',r:'no limits',act:()=>basicFlow('PRIM')});
+  go('list',listUi('Select Care Unit',items,{tr:fmtDate()}));
+}
+/* her pump: care unit -> alphabetical drug list that starts with ABC and IV fluid (no category step) */
+function herDrugList(ctx){
+  const ds=availDrugs(ctx).slice().sort((a,b)=>a.s.localeCompare(b.s));
+  const items=[{t:'ABC',key:'A',act:()=>toast('Scroll ▼ to choose what to program')}];
+  if(ctx==='SEC') items.push({t:'Intermittent (other)',key:'A',act:()=>ivfFlow(ctx,'Intermittent (other)')});
+  items.push({t:'IV fluid',key:'A',act:()=>ivfFlow(ctx,'IV fluid')});
+  ds.forEach(d=>items.push({t:d.s,r:d.adv?'!':'',act:()=>pickDrug(d,ctx)}));
+  go('list',listUi(unitLabel(S.unit),items,{alpha:true,tr:fmtDate()}));
+}
+function ivfFlow(ctx,name){
+  ev('ivfluid',{ctx,name});
+  const inf=newInf('basic',null,ctx); inf.ivf=true; inf.name=name; inf.unit=S.unit; inf.profile=S.profile;
+  finishProgram(inf,ctx);
+}
+function availDrugs(ctx){
+  return DRUGS.filter(d=>d.u.indexOf(S.unit)>=0&&(!S.profile||d.pr.indexOf(S.profile)>=0)&&(ctx==='SEC'?d.role!=='P':d.role!=='S'));
+}
+function pickProfile(ctx){
+  const profs=PROFILES.filter(p=>DRUGS.some(d=>d.u.indexOf(S.unit)>=0&&d.pr.indexOf(p)>=0));
+  go('list',listUi('Select Patient Profile',profs.map(p=>({t:p,act:()=>{ S.profile=p; ev('profile',{name:p}); if(S.fullLib) pickCategory(ctx); else herDrugList(ctx); }}))));
+}
+function pickCategory(ctx){
+  const ds=availDrugs(ctx);
+  const cats=[...new Set(ds.map(d=>d.cat))].sort();
+  const items=[{t:'All Drugs',act:()=>pickDrugList(ctx,null)}].concat(cats.map(c=>({t:c,act:()=>pickDrugList(ctx,c)})));
+  go('list',listUi('Select Drug Category',items));
+}
+function pickDrugList(ctx,cat){
+  const ds=availDrugs(ctx).filter(d=>!cat||d.cat===cat).sort((a,b)=>a.s.localeCompare(b.s));
+  if(!ds.length){ toast('No drugs available'); return; }
+  go('list',listUi('Select Drug'+(cat?' - '+cat:''),ds.map(d=>({t:d.s,r:d.adv?'!':'',act:()=>pickDrug(d,ctx)})),{alpha:true}));
+}
+function concText(c){ return c[0]+' '+c[1]+' / '+c[2]+' mL'; }
+function pickDrug(d,ctx){
+  ev('drug',{id:d.id,name:d.s,ctx});
+  const inf=newInf('lib',d,ctx);
+  S.set.down=d.press; S.set.up=Math.min(S.set.up,9);
+  const steps=[];
+  if(d.adv) steps.push(next=>go('msg',{title:'CLINICAL ADVISORY',cls:'warn',lines:wrap(d.adv,34),bot:'OOK = confirm advisory',ok:next}));
+  if(d.c&&d.c.length>1) steps.push(next=>go('list',listUi('Select Concentration',d.c.map((c,i)=>({t:concText(c),act:()=>{ inf.concIdx=i; ev('conc',{idx:i,text:concText(c)}); next(); }})))));
+  if(d.m.length>1) steps.push(next=>go('list',listUi('Select Infusion Mode',d.m.map(m=>({t:m==='C'?'Continuous':'Dose Over Time',act:()=>{ inf.mode=m; ev('mode',{mode:m}); next(); }})))));
+  steps.push(next=>{
+    if(!needsWeight(inf)) return next();
+    edit({label:'Enter patient weight',unit:'kg',val:0,dec:1,int:3,pos:1,hl:0.3,hh:350,sl:WEIGHT_SOFT[S.profile][0],sh:WEIGHT_SOFT[S.profile][1],field:'weight',
+      onOk:v=>{ inf.weight=v; ev('weight',{kg:v}); next(); }});
+  });
+  steps.push(next=>{
+    if(!(d.load&&inf.mode==='C'&&ctx==='PRIM')) return next();
+    go('yesno',{title:'LOADING DOSE',lines:['Program Loading Dose?','','▲ = YES','▼ = NO'],
+      yes:()=>{ ev('loadq',{yes:true}); back(); programLoad(inf,next); },
+      no:()=>{ ev('loadq',{yes:false}); back(); next(); }});
+  });
+  steps.push(next=>{ if(inf.mode==='D') programDOT(inf,ctx,next); else next(); });
+  seq(steps,()=>finishProgram(inf,ctx));
+}
+function programLoad(inf,next){
+  const d=inf.drug, l=lim(inf,'loaddose');
+  edit({label:'LOAD dose',unit:d.load.u,val:0,dec:2,int:4,hl:0,hh:l.hh,field:'loaddose',onOk:v=>{
+    ev('param',{ctx:'PRIM',field:'loaddose',val:v});
+    const vol=v/cpm(inf,d.load.u);
+    edit({label:'LOAD time',unit:'h:mm',time:true,val:0,hl:Math.max(1,Math.ceil(vol/1200*60)),hh:5999,field:'loadtime',onOk:t=>{
+      ev('param',{ctx:'PRIM',field:'loadtime',val:t});
+      inf.load={dose:v,time:t,vol:Math.round(vol*10)/10,rate:roundRate(vol/(t/60)),done:0,u:d.load.u};
+      next();
+    }});
+  }});
+}
+function programDOT(inf,ctx,next){
+  const d=inf.drug, l=lim(inf,'dose');
+  edit({label:'Total Dose',unit:d.dot.u,val:0,dec:2,int:4,hl:l.hl,hh:l.hh,sl:l.sl,sh:l.sh,field:'dose',
+    calc:v=>v>0?'VTBI '+fmtVol(v/cpm(inf,d.dot.u))+' mL':'',
+    onOk:v=>{
+      setField(inf,'dose',v); ev('param',{ctx,field:'dose',val:v});
+      const t=lim(inf,'dotTime');
+      edit({label:'Total Time',unit:'h:mm',time:true,val:0,hl:t.hl,hh:t.hh,sl:t.sl,sh:t.sh,field:'dotTime',
+        calc:m=>m>0?'Rate '+fmtRate(roundRate(inf.vtbi/(m/60)))+' mL/h':'',
+        onOk:m=>{ setField(inf,'dotTime',m); ev('param',{ctx,field:'dotTime',val:m}); next(); }});
+    }});
+}
+function finishProgram(inf,ctx){
+  if(ctx==='PRIM'){ S.inf.PRIM=inf; S.inf.SEC=null; S.cur='PRIM'; S.act='PRIM'; }
+  else { S.inf.SEC=inf; S.cur='SEC'; }
+  S.homeI[ctx]=0; S.stack=[]; S.ui=null;
+  ev('programmed',{ctx}); save();
+  if(ctx==='SEC') toBase2(); else toBase();
+}
+
+/* ---------- basic infusion ---------- */
+function basicFlow(ctx){
+  ev('basic',{ctx});
+  go('msg',{title:'WARNING',cls:'warn',lines:wrap(ADVISORY_BASIC,34),bot:'OK = confirm',ok:()=>{
+    go('yesno',{title:'BASIC INFUSION',lines:['Continue without limits?','','▲ = YES','▼ = NO'],
+      yes:()=>{
+        const inf=newInf('basic',null,ctx); inf.unit=S.unit; inf.profile=S.profile;
+        ev('basic-continue');
+        go('yesno',{title:'DOSE RATE CALCULATOR',lines:['Use dose rate calculator?','','▲ = YES','▼ = NO'],
+          yes:()=>calcFlow(inf,ctx,true), no:()=>finishProgram(inf,ctx)});
+      },
+      no:()=>toBase()});
+  },cancel:()=>toBase()});
+}
+
+/* ---------- dose rate calculator ---------- */
+const CALC_UNITS=['ng','mcg','mg','g','mU','U','kU','MU','mEq','mmol','kcal'];
+const FAM={ng:['ng','mcg','mg','g'],mcg:['ng','mcg','mg','g'],mg:['ng','mcg','mg','g'],g:['ng','mcg','mg','g'],mU:['mU','U','kU','MU'],U:['mU','U','kU','MU'],kU:['mU','U','kU','MU'],MU:['mU','U','kU','MU'],mEq:['mEq'],mmol:['mmol'],kcal:['kcal']};
+function calcFlow(inf,ctx,isNew){
+  const c={unit:null,amt:0,vol:0,per:null,pv:1,du:null};
+  go('list',listUi('Calc: drug units',CALC_UNITS.map(u=>({t:u,act:()=>{ c.unit=u;
+    edit({label:'Amount of drug in bag',unit:u,val:0,dec:1,int:5,field:'calcamt',onOk:a=>{ c.amt=a;
+      edit({label:'Volume of bag',unit:'mL',val:0,dec:1,int:4,field:'calcvol',onOk:vv=>{ c.vol=vv;
+        go('list',listUi('Calc: patient parameter',[
+          {t:'None',act:()=>{c.per=null;c.pv=1;calcDU(inf,ctx,c,isNew);}},
+          {t:'Weight (kg)',act:()=>edit({label:'Patient weight',unit:'kg',val:0,dec:1,int:3,pos:1,hl:0.3,hh:350,field:'weight',onOk:w=>{c.per='kg';c.pv=w;calcDU(inf,ctx,c,isNew);}})},
+          {t:'BSA (m2)',act:()=>edit({label:'Body surface area',unit:'m2',val:0,dec:2,int:2,hl:0.05,hh:4,field:'bsa',onOk:w=>{c.per='m2';c.pv=w;calcDU(inf,ctx,c,isNew);}})}
+        ]));
+      }});
+    }});
+  }}))));
+}
+function calcDU(inf,ctx,c,isNew){
+  const items=[];
+  FAM[c.unit].forEach(a=>['min','h'].forEach(t=>items.push({t:a+'/'+(c.per?c.per+'/':'')+t,act:()=>{ c.du=a+'/'+(c.per?c.per+'/':'')+t; c.da=a; c.dt=t;
+    const conc=c.amt*FACTOR[c.unit]/FACTOR[a]/c.vol;
+    const toRate=d=>c.vol>0&&c.amt>0?d*(c.per?c.pv:1)*(t==='min'?60:1)/conc:0;
+    edit({label:'Desired doserate',unit:c.du,val:0,dec:3,int:4,field:'calcdose',
+      calc:v=>'Rate '+fmtRate(roundRate(toRate(v)))+' mL/h',
+      onOk:v=>{
+        const rate=roundRate(toRate(v)); ev('param',{ctx:'calc',field:'calcdoserate',val:v});
+        go('msg',{title:'CALCULATED RATE',lines:[fmtNum(v,3)+' '+c.du,'= '+fmtRate(rate)+' mL/h','','OK = accept & use rate'],ok:()=>{
+          ev('param',{ctx:ctx||'PRIM',field:'rate',val:rate});
+          if(isNew){ setField(inf,'rate',rate); finishProgram(inf,ctx); }
+          else if(inf&&inf.kind==='basic'){ setField(inf,'rate',rate); save(); toBase(); }
+          else if(!inf){ const b=newInf('basic',null,'PRIM'); b.unit=S.unit; setField(b,'rate',rate); finishProgram(b,'PRIM'); }
+          else { toast('Calculator result is for reference'); toBase(); }
+        }});
+      }});
+  }})));
+  go('list',listUi('Calc: doserate units',items));
+}
+
+/* ---------- field editing (home / titration) ---------- */
+function fieldCfg(inf,k){
+  const d=inf.drug; const fT=m=>inf.ivf?fmtHML(m):fmtHM(m);
+  const unitD=inf.mode==='D'?d.dot.u:'';
+  if(k==='doserate'){ const l=lim(inf,'doserate'); return {label:'Doserate',unit:d.du,val:inf.doserate,dec:d.dec,int:4,hl:l.hl,hh:l.hh,sl:l.sl,sh:l.sh,
+    calc:v=>'Rate '+fmtRate(roundRate(d2r(inf,v)))+' mL/h'+(inf.vtbi>0&&d2r(inf,v)>0?'   Time '+fT(inf.vtbi/d2r(inf,v)*60):'')}; }
+  if(k==='rate'){ const l=lim(inf,'rate');
+    return {label:'Rate',unit:'mL/h',val:inf.rate,dec:1,int:4,hl:l?l.hl:0,hh:l?l.hh:1200,sl:l&&l.sh<1e8?l.sl:null,sh:l?l.sh:null,
+      calc:v=>{ if(hasDose(inf)) return 'Doserate '+fmtNum(r2d(inf,v),d.dec)+' '+d.du;
+        if(inf.vtbi>0&&v>0) return 'Time '+fT(inf.vtbi/v*60); if(inf.time>0) return 'VTBI '+fmtVol(v*inf.time/60); return ''; }}; }
+  if(k==='vtbi') return {label:'VTBI',unit:'mL',val:inf.vtbi,dec:1,int:4,pos:inf.vtbi?0:1,hl:0,hh:9999,
+    calc:v=>{ if(inf.kind==='basic'&&inf.set.indexOf('rate')<0&&inf.time>0&&v>0) return 'Rate '+fmtRate(roundRate(v/inf.time*60))+' mL/h'; return inf.rate>0&&v>0?'Time '+fT(v/inf.rate*60):''; }};
+  if(k==='time') return {label:'Time',unit:'h:mm',time:true,val:Math.round(inf.time),hl:0,hh:5999,
+    calc:m=>{ if(inf.kind==='basic'&&inf.set.indexOf('rate')<0&&inf.vtbi>0&&m>0) return 'Rate '+fmtRate(roundRate(inf.vtbi/m*60))+' mL/h'; return inf.rate>0&&m>0?'VTBI '+fmtVol(inf.rate*m/60)+' mL':''; }};
+  if(k==='dose'){ const l=lim(inf,'dose'); return {label:'Total Dose',unit:unitD,val:inf.dose,dec:2,int:4,hl:l.hl,hh:l.hh,sl:l.sl,sh:l.sh,calc:v=>v>0?'VTBI '+fmtVol(v/cpm(inf,unitD))+' mL':''}; }
+  if(k==='dotTime'){ const l=lim(inf,'dotTime'); return {label:'Total Time',unit:'h:mm',time:true,val:Math.round(inf.dotTime),hl:l.hl,hh:l.hh,sl:l.sl,sh:l.sh,calc:m=>m>0?'Rate '+fmtRate(roundRate(inf.vtbi/(m/60)))+' mL/h':''}; }
+  if(k==='loaddose'){ const l=lim(inf,'loaddose'); return {label:'LOAD dose',unit:inf.load.u,val:inf.load.dose,dec:2,int:4,hl:0,hh:l.hh}; }
+  if(k==='loadtime') return {label:'LOAD time',unit:'h:mm',time:true,val:inf.load.time,hl:1,hh:5999};
+  return null;
+}
+function openField(inf,k){
+  const running=(S.run==='infusing'&&S.act===S.cur);
+  if(inf.mode==='D'&&running){ toast('Function Disabled'); return; }
+  if(S.phase==='BOLUS'&&S.run==='infusing'){ toast('Not during bolus'); return; }
+  const cfg=fieldCfg(inf,k); if(!cfg) return;
+  cfg.field=k;
+  cfg.onOk=(v,soft)=>{
+    if(k==='loaddose'||k==='loadtime'){
+      if(k==='loaddose') inf.load.dose=v; else inf.load.time=v;
+      inf.load.vol=Math.round(inf.load.dose/cpm(inf,inf.load.u)*10)/10;
+      inf.load.rate=inf.load.time>0?roundRate(inf.load.vol/(inf.load.time/60)):0;
+    } else {
+      setField(inf,k,v);
+      if(soft) inf.ovr=true;
+    }
+    ev('param',{ctx:S.cur,field:k,val:v,soft:!!soft,running});
+    if(running) ev('titrate',{field:k,val:v});
+    save(); if(S.cur!==S.act&&S.run==='infusing') toBase2(); else toBase();
+  };
+  edit(cfg);
+}
+
+/* ---------- home ---------- */
+function homeItems(){
+  const inf=S.inf[S.cur]; const it=[]; if(!inf) return it;
+  const sm=symFor(inf);
+  if(inf.load&&!inf.load.finished&&!inf.load.cancelled){
+    it.push({k:'loaddose',t:'LOAD dose',r:fmtNum(inf.load.dose,2)+' '+inf.load.u});
+    it.push({k:'loadtime',t:'LOAD time',r:fmtHM(inf.load.time)+' h'});
+  }
+  if(inf.mode==='D'){
+    it.push({k:'dose',t:'Total dose',r:fmtNum(inf.dose,2)+' '+inf.drug.dot.u+' '+sm});
+    it.push({k:'dotTime',t:'Total time',r:fmtHM(inf.dotTime)+' h'});
+    it.push({t:'Rate',r:fmtRate(inf.rate)+' mL/h',dim:true});
+    it.push({t:'VTBI',r:fmtVol(inf.vtbi)+' mL',dim:true});
+  } else {
+    const tg=k=>inf.kind==='basic'&&!inf.ivf&&inf.target===k?'⊙ ':'';
+    if(hasDose(inf)) it.push({k:'doserate',t:'Doserate',r:fmtNum(inf.doserate,inf.drug.dec)+' '+inf.drug.du+' '+sm});
+    it.push({k:'rate',t:tg('rate')+'Rate',r:fmtRate(inf.rate)+' mL/h'+(hasDose(inf)?'':' '+sm)});
+    it.push({k:'vtbi',t:tg('vtbi')+'VTBI',r:inf.vtbi>0?fmtVol(inf.vtbi)+' mL':'-- mL'});
+    it.push({k:'time',t:tg('time')+'Time',r:inf.time>0?fmtHM(inf.time)+' h':'-- h'});
+  }
+  if(inf.ivf) it.forEach(x=>{ if(x.k==='rate') x.r=inf.rate>0?fmtRate(inf.rate)+' ml/h':'---- ml/h'; else if(x.k==='vtbi') x.r=inf.vtbi>0?fmtVol(inf.vtbi)+' ml':'---- ml'; else if(x.k==='time') x.r=inf.time>0?fmtHML(inf.time):'-- h/min'; });
+  if(S.cur==='PRIM'){
+    it.push({t:'SECondary',r:S.inf.SEC?'(set)':'▸',act:()=>secMenu()});
+    if(inf.kind==='lib') it.push({t:'Change Care Unit',r:'▸',act:()=>careUnitChange()});
+  } else {
+    if(S.inf.PRIM) it.push({t:'Resume PRIMary',r:'▸',act:()=>{ ev('sec-menu',{item:'resume-prim'}); S.cur='PRIM'; startInfusion(); if(S.run!=='infusing') toBase(); }});
+    it.push({t:'Back to PRIM',get r(){ return S.secMode==='auto'?'automatic':'manual'; },act:()=>backToPrim()});
+  }
+  it.push({t:'Infused Totals',r:'▸',act:()=>totalsScreen()});
+  it.push({t:'Status',r:'▸',act:()=>statusScreen()});
+  it.push({t:'Options',r:'▸',act:()=>optionsScreen()});
+  return it;
+}
+SC.home={
+  r(u){
+    const inf=S.inf[S.cur];
+    if(!inf){ return {rows:[{t:'No infusion'}]}; }
+    const items=homeItems(); let i=clamp(S.homeI[S.cur],0,items.length-1); S.homeI[S.cur]=i;
+    const N=7; let top=u.top||0; if(i<top) top=i; if(i>=top+N) top=i-N+1; u.top=top;
+    const title=(inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.s+(inf.mode==='D'?' (DOT)':'')+(concOf(inf)?'  '+concOf(inf)[0]+concOf(inf)[1]+'/'+concOf(inf)[2]+'mL':''));
+    const rows=[{t:title,cls:'hd'}].concat(items.slice(top,top+N).map((x,j)=>({t:x.t,r:x.r,hl:top+j===i,dim:x.dim})));
+    const ready=programmedOK(inf);
+    let tr='';
+    const loadPending=inf.load&&!inf.load.finished&&!inf.load.cancelled;
+    if(S.phase==='BOLUS'&&S.bol) tr='BOL: resume';
+    else if(S.run==='infusing'&&S.act===S.cur) tr='';
+    else if(ready) tr=(loadPending&&Math.floor(Date.now()/1000)%2?'LOAD dose and Start':'Start');
+    return {tl:S.cur+(S.run==='infusing'&&S.act===S.cur?' ▶':''),tc:(S.run==='infusing'?'':''),tr,rows,
+      bot:(S.run==='infusing'&&S.act===S.cur)?'Infusing - C = run screen':(inf.kind==='basic'?'Enter 2 of 3: Rate, VTBI, Time':'▲▼ scroll  ◀/OK edit  C exit')};
+  },
+  k(k,u){
+    const inf=S.inf[S.cur]; if(!inf) return false;
+    const items=homeItems(); let i=S.homeI[S.cur];
+    if(k==='u'){ S.homeI[S.cur]=Math.max(0,i-1); return true; }
+    if(k==='d'){ S.homeI[S.cur]=Math.min(items.length-1,i+1); return true; }
+    if(k==='K'||k==='l'){
+      const x=items[i]; if(!x||x.dim) { if(x&&x.dim) toast('Function Disabled'); return true; }
+      if(x.k) openField(inf,x.k); else if(x.act) x.act();
+      return true;
+    }
+    if(k==='C'){
+      if(S.run==='infusing'&&S.act===S.cur){ toBase(); return true; }
+      const ctx=S.cur;
+      go('yesno',{title:'EXIT AND CLEAR INFUSION?',lines:[ctx==='SEC'?'Secondary will be cleared.':'All programmed values will be cleared.','','▲ = YES','▼ = NO'],
+        yes:()=>{ ev('exitclear',{ctx}); clearInf(ctx); toBase(); }});
+      return true;
+    }
+    return false;
+  }
+};
+function clearInf(ctx){
+  if(ctx==='SEC'){
+    if(S.act==='SEC'&&S.run!=='stopped') S.run='stopped';
+    pushPrevSec(S.inf.SEC); S.inf.SEC=null; S.cur='PRIM'; S.act='PRIM';
+  } else {
+    S.run='stopped'; S.phase=null; S.bol=null; S.bolPending=null;
+    S.inf.PRIM=null; S.inf.SEC=null; S.cur='PRIM'; S.act='PRIM'; S.last=null;
+  }
+  save();
+}
+
+/* ---------- run screen ---------- */
+function statusLine(inf){
+  const c=concOf(inf); const i=((S.statusIdx%8)+8)%8;
+  return [
+    'Care unit: '+(inf.unit||'-'),
+    inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.l,
+    'Time left: '+fmtHM(inf.time)+' h',
+    'VTBI left: '+(inf.lim?fmtVol(inf.vtbi)+' mL':'--'),
+    c?'Conc: '+c[0]+' '+c[1]+'/'+c[2]+' mL':'Conc: -',
+    'Volume infused: '+fmtVol(S.volTotal)+' mL',
+    'PRIM infused: '+fmtVol(S.totals.prim)+' mL',
+    'SEC infused: '+fmtVol(S.totals.sec)+' mL'
+  ][i];
+}
+SC.run={
+  r(u){
+    const inf=activeInf(); if(!inf) return {rows:[{t:'--'}]};
+    const kvo=S.run==='kvo';
+    let rate=inf.rate, tag='';
+    if(S.phase==='BOLUS'&&S.bol){ rate=S.bol.rate; tag='BOLUS'; }
+    else if(S.phase==='LOAD'&&inf.load){ rate=inf.load.rate; tag='LOAD'; }
+    else if(kvo){ rate=KVO_RATE; tag='KVO'; }
+    const sm=symFor(inf);
+    const arrows='<div class="arrows'+(tag?' tagged':'')+'"><span>▶</span><span>▶</span><span>▶</span><span>▶</span><span>▶</span>'+(tag?'<b class="tag">'+tag+'</b>':'')+'</div>';
+    let rows;
+    if(S.set.macro){
+      rows=[{h:'<div class="macro">'+fmtRate(rate)+'</div>'},{t:'mL/h',cls:'dim'},{h:arrows}];
+    } else {
+      rows=[{t:(S.act+'  ')+(inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.l),cls:'hd'},
+        {h:'<div class="runrate">'+fmtRate(rate)+'<small> mL/h</small></div>'}];
+      if(S.phase==='BOLUS'&&S.bol) rows.push({t:'Bolus left',r:fmtNum(S.bol.vol-S.bol.done,2)+' mL'});
+      else if(S.phase==='LOAD'&&inf.load) rows.push({t:'LOAD left',r:fmtNum(inf.load.vol-inf.load.done,2)+' mL'});
+      else if(hasDose(inf)) rows.push({t:'Doserate',r:fmtNum(inf.doserate,inf.drug.dec)+' '+inf.drug.du+' '+sm});
+      rows.push({t:'VTBI left',r:inf.lim?fmtVol(inf.vtbi)+' mL':'--'});
+      rows.push({t:'Time left',r:inf.lim?fmtHM(inf.time)+' h':'--'});
+      rows.push({t:'Delivered',r:fmtVol(inf.vol)+' mL   '+fmtHMS(inf.elapsed)});
+      rows.push({h:arrows});
+    }
+    return {tl:S.act+(tag?' '+tag:''),tc:sm,tr:kvo?'KVO':'',rows,bot:statusLine(inf)};
+  },
+  k(k,u){
+    const inf=activeInf();
+    if(k==='d'){ S.statusIdx++; return true; }
+    if(k==='u'){ S.statusIdx--; return true; }
+    if(k==='l'){
+      if(!inf||S.run!=='infusing') return true;
+      if(inf.mode==='D'){ toast('Function Disabled'); return true; }
+      if(S.phase==='BOLUS'||S.phase==='LOAD'){ toast('Not during '+S.phase); return true; }
+      S.cur=S.act;
+      openField(inf,hasDose(inf)?'doserate':'rate'); return true;
+    }
+    if(k==='C'){
+      if(S.phase==='BOLUS'&&S.bol){ S.run='stopped'; ev('bolus-stop'); toast('BOLUS stopped - press BOL to resume',3500); toBase(); return true; }
+      S.cur=S.act; toBase2(); return true;
+    }
+    return k==='r'||k==='K';
+  }
+};
+function toBase2(){ S.stack=[]; S.ui={id:'home',t0:Date.now()}; draw(); }
+
+/* ---------- secondary ---------- */
+function secMenu(){
+  ev('sec-open');
+  const items=[];
+  if(S.inf.SEC) items.push({t:'Show SECondary',act:()=>{ ev('sec-menu',{item:'show'}); S.cur='SEC'; toBase(); }});
+  items.push({t:'New SECondary',act:()=>{ ev('sec-menu',{item:'new'}); if(S.fullLib) pickCategory('SEC'); else herDrugList('SEC'); }});
+  if(S.prevSec.length) items.push({t:'Use a previous SEC infusion',act:()=>prevSecList()});
+  items.push({t:'Back to PRIM',get r(){ return S.secMode==='auto'?'automatic':'manual'; },act:()=>backToPrim()});
+  items.push({t:'Basic Infusion',act:()=>basicFlow('SEC')});
+  go('list',listUi('SEC',items,{tr:'C: Home',bot:'▲▼ scroll    OK select    C home'}));
+}
+function backToPrim(){
+  go('yesno',{title:'SEC change to PRIM',lines:['Auto-change to PRIMary?'],
+    yes:()=>{ S.secMode='auto'; ev('sec-menu',{item:'backto-auto'}); save(); back(); },
+    no:()=>{ S.secMode='manual'; ev('sec-menu',{item:'backto-manual'}); save(); back(); }});
+}
+function prevSecList(){
+  go('list',listUi('Previous SEC',S.prevSec.map(p=>{
+    const d=p.drugId?DRUGS.find(x=>x.id===p.drugId):null;
+    return {t:d?d.s:(p.name||'Basic Infusion'),r:p.mode==='D'?fmtNum(p.dose,1)+' '+(d?d.dot.u:''):fmtRate(p.rate)+' mL/h',act:()=>{
+      const inf=unpackInf(JSON.parse(JSON.stringify(p))); inf.vol=0; inf.elapsed=0; inf.secChecked=false;
+      ev('sec-menu',{item:'previous',drug:d?d.id:null}); finishProgram(inf,'SEC');
+    }};
+  })));
+}
+SC.secrem={
+  modal:true,
+  r(u){ return {tl:'PRIM ▸ SEC',tr:'START',rows:[{t:''},{t:'Unclamp secondary line and',cls:'warn'},{t:'check bag height',cls:'warn'}],bot:'Start/Stop = confirm & start   C = cancel'}; },
+  k(k,u){
+    if(k==='sf'){ const inf=S.inf.SEC; if(inf) inf.secChecked=true; ev('sec-reminder-ok'); back(); startInfusion(); return true; }
+    if(k==='C'){ back(); return true; }
+    return true;
+  }
+};
+
+/* ---------- care unit change ---------- */
+function careUnitChange(){
+  go('list',listUi('Change Care Unit',CARE_UNITS.map(n=>({t:n,r:n===S.unit?'*':'',act:()=>applyUnitChange(n)}))));
+}
+function applyUnitChange(n){
+  const inf=S.inf.PRIM;
+  if(S.inf.SEC){ go('msg',{title:'CARE UNIT',cls:'warn',lines:['Cannot change care unit','while SECondary is set.'],ok:()=>back(2)}); ev('unit-change',{to:n,result:'blocked-sec'}); return; }
+  if(n===S.unit){ back(); return; }
+  const d=inf.drug;
+  const fail=(msg)=>{ ev('unit-change',{to:n,result:'reverted'}); go('msg',{title:'CARE UNIT NOT CHANGED',cls:'warn',lines:wrap(msg,34),ok:()=>{ toBase(); }}); };
+  if(!d.u.includes(n)) return fail('Drug '+d.s+' is not available in '+n+'. Staying in '+S.unit+'.');
+  if(!d.pr.includes(inf.profile)) return fail('Patient profile '+inf.profile+' not available in '+n+'.');
+  const old=inf.unit; inf.unit=n;
+  let f,v;
+  if(inf.mode==='D'){ f='dose'; v=inf.dose; } else if(hasDose(inf)){ f='doserate'; v=inf.doserate; } else { f='rate'; v=inf.rate; }
+  const l=lim(inf,f);
+  if(l&&v>l.hh+eps){ inf.unit=old; return fail('Current value exceeds the HARD limit of '+n+' ('+fmtNum(l.hh,2)+'). Staying in '+S.unit+'.'); }
+  const done=(res)=>{ S.unit=n; inf.unit=n; ev('unit-change',{to:n,result:res}); save(); toBase(); toast('Care unit: '+n); };
+  if(l&&v>l.sh+eps){
+    go('yesno',{title:'SOFT LIMIT in '+n,tl:'[↑]',lines:['Current value exceeds','upper soft limit of '+n+'.','Override?'],
+      yes:()=>{ ev('override',{yes:true,field:'unit'}); inf.ovr=true; done('soft-override'); },
+      no:()=>{ ev('override',{yes:false,field:'unit'}); inf.unit=old; ev('unit-change',{to:n,result:'reverted'}); toBase(); }});
+  } else done('ok');
+}
+
+/* ---------- bolus (programmed) ---------- */
+function bolusMenu(){
+  if(S.phase==='BOLUS'&&S.bol&&S.run==='stopped'){ S.run='infusing'; ev('bolus-resume'); toBase(); return; }
+  const inf=S.inf.PRIM;
+  if(!inf){ toast('No infusion programmed'); return; }
+  if(S.act==='SEC'&&S.run==='infusing'){ toast('Bolus: PRIM only'); return; }
+  if(inf.mode==='D'){ toast('Function Disabled'); return; }
+  if(inf.kind==='basic'||!inf.drug.bol){ toast('No programmed bolus - hold BOL for manual'); return; }
+  if(S.phase==='LOAD'){ toast('Not during LOAD'); return; }
+  S.cur='PRIM';
+  go('list',listUi('Bolus',[{t:'Program bolus dose and time',act:()=>{ ev('bolus-menu'); bolusUnit(inf); }},{t:'(hold BOL = manual bolus)',dim:true}]));
+}
+function bolusUnit(inf){
+  const b=inf.drug.bol; const fam=FAM[b.u];
+  const units=fam.length>1?[b.u].concat(fam.filter(x=>x!==b.u&&['mg','mcg','g'].includes(x)&&Math.abs(Math.log10(FACTOR[x]/FACTOR[b.u]))<=3.01)):[b.u];
+  go('list',listUi('Bolus dosing unit',units.map(u=>({t:u,act:()=>{
+    const hm=(UNIT_MULT[inf.unit]||[1,1])[1]*(PROF_MULT[inf.profile]||1);
+    const max=b.max*hm*FACTOR[b.u]/FACTOR[u];
+    edit({label:'Bolus dose',unit:u,val:0,dec:u==='mcg'?0:2,int:4,hl:0,hh:max,field:'boldose',
+      calc:v=>v>0?'= '+fmtNum(v/cpm(inf,u),2)+' mL':'',
+      onOk:dose=>{
+        ev('param',{ctx:'PRIM',field:'boldose',val:dose,unit:u});
+        const vol=dose/cpm(inf,u);
+        edit({label:'Bolus time',unit:'h:mm',time:true,val:0,hl:Math.max(1,Math.ceil(vol/1200*60)),hh:5999,field:'boltime',
+          calc:m=>m>0?'Rate '+fmtRate(roundRate(vol/(m/60)))+' mL/h':'',
+          onOk:t=>{
+            ev('param',{ctx:'PRIM',field:'boltime',val:t});
+            S.bolPending=Date.now();
+            go('bolreview',{inf,dose,unit:u,time:t,vol:Math.round(vol*100)/100,rate:roundRate(vol/(t/60))});
+          }});
+      }});
+  }}))));
+}
+SC.bolreview={
+  modal:true,
+  r(u){ return {tl:'BOLUS',rows:[{t:'Bolus ready',cls:'hd'},{t:'Dose',r:fmtNum(u.dose,2)+' '+u.unit},{t:'Time',r:fmtHM(u.time)+' h'},{t:'Volume',r:fmtNum(u.vol,2)+' mL'},{t:'Rate',r:fmtRate(u.rate)+' mL/h'},{t:''},{t:'Press BOL to start',cls:'warn'}],bot:'BOL = start bolus   C = cancel'}; },
+  k(k,u){
+    if(k==='nb'){
+      S.bol={dose:u.dose,unit:u.unit,vol:u.vol,rate:u.rate,done:0}; S.phase='BOLUS'; S.act='PRIM'; S.cur='PRIM';
+      if(!lineReady()){ S.bol=null; S.phase=null; return true; }
+      S.bolPending=null; S.run='infusing'; ev('bolus-start',{kind:'prog',dose:u.dose,unit:u.unit,time:u.time});
+      toBase(); return true;
+    }
+    if(k==='C'){ S.bolPending=null; ev('bolus-cancel'); toBase(); return true; }
+    return true;
+  }
+};
+SC.manbol={
+  modal:true,
+  r(u){
+    const m=S.man;
+    if(!m) return {rows:[{t:'Manual Bolus',cls:'hd'}]};
+    return {tl:'BOLUS',rows:[{t:'Use Manual Bolus feature',cls:'hd'},{t:'Hold BOL to deliver',cls:m.t<0.6?'warn':'dim'},{h:'<div class="runrate">'+fmtNum(m.vol,2)+'<small> mL</small></div>'},{t:'Time',r:fmtNum(m.t,1)+' / 10 s'},{t:'Rate',r:fmtRate(S.set.bolusRate)+' mL/h',cls:'dim'}],bot:'Release BOL to stop (max 10 s)'};
+  },
+  k(){ return true; }
+};
+
+/* ---------- totals / status / options ---------- */
+function totalsScreen(){
+  const mk=()=>[
+    {t:'Primary',r:fmtVol(S.totals.prim)+' mL',act:()=>zero('prim')},
+    {t:'Secondary',r:fmtVol(S.totals.sec)+' mL',act:()=>zero('sec')},
+    {t:'Combined',r:fmtVol(S.totals.prim+S.totals.sec)+' mL',act:()=>zero('both')}];
+  const zero=w=>go('yesno',{title:'ZERO VALUE?',lines:['Zero '+w+' total?','','▲ = YES','▼ = NO'],yes:()=>{ if(w==='both'){S.totals.prim=0;S.totals.sec=0;S.volTotal=0;} else S.totals[w]=0; save(); back(); S.ui.items=mk(); draw(); ev('totals-zero',{w}); }});
+  go('list',listUi('Infusion Totals',mk(),{bot:'OK = zero selected value   C back'}));
+}
+function statusScreen(){
+  const inf=S.inf.PRIM||S.inf.SEC;
+  const rate=(S.run==='infusing'&&activeInf())?activeInf().rate:0;
+  const drain=S.run==='stopped'?3:5+rate*0.006;
+  const lines=[];
+  lines.push('Battery: '+Math.round(S.batt)+'%  '+(S.ac?'(AC power)':'~'+(S.batt/drain).toFixed(1)+' h left'));
+  lines.push('Last bolus: '+(S.lastBolus?fmtNum(S.lastBolus.dose,2)+' '+S.lastBolus.unit:'none'));
+  if(S.lastBolus) lines.push(' '+S.lastBolus.date);
+  lines.push('Care unit: '+(S.unit||'-'));
+  lines.push('Drug file: '+DRUG_FILE_DATE);
+  lines.push('Drug: '+(inf?(inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.l):'-'));
+  lines.push('Profile: '+(S.profile||'-'));
+  if(inf&&inf.drug&&inf.drug.adv) wrap('Advisory: '+inf.drug.adv,34).forEach(l=>lines.push(l)); else lines.push('Advisory: none');
+  lines.push('Software: '+SW_VERSION);
+  lines.push('Wireless: '+(S.set.wireless?'ON':'OFF'));
+  lines.push('IV line: '+(S.line?'inserted':'not inserted'));
+  go('list',listUi('Status',lines.map(t=>({t,act:()=>{}})),{bot:'▲▼ scroll   C back'}));
+}
+function yn(title,cur,onSet,extra){
+  go('yesno',{title,lines:['Currently: '+(cur?'ON':'OFF')].concat(extra||[],['','▲ = YES (ON)','▼ = NO (OFF)']),
+    yes:()=>{ onSet(true); save(); back(); toast(title+': ON'); }, no:()=>{ onSet(false); save(); back(); toast(title+': OFF'); }});
+}
+function optionsScreen(){
+  ev('options-open');
+  const lvl=(title,key,fmt,ev2)=>go('level',{title,val:S.set[key],min:1,max:9,fmt,onOk:v=>{S.set[key]=v;save();ev('option',{key,val:v});toast(title+': '+v);},onChange:key==='vol'?()=>snd.tone(880,0.12,'sine',1):null});
+  const items=[
+    {t:'Downstream Occl. Pressure',r:'L'+S.set.down,act:()=>lvl('Downstream pressure','down',v=>'~'+PRESSURE_MMHG[v-1]+' mmHg')},
+    {t:'Upstream Occl. Pressure',r:'L'+S.set.up,act:()=>lvl('Upstream pressure','up',v=>'level '+v+' of 9')},
+    {t:'Alarm Volume',r:S.set.vol+'/9',act:()=>lvl('Alarm volume','vol',v=>'level '+v+' of 9')},
+    {t:'Dose Rate Calculator',r:'▸',act:()=>{ calcFlow(S.inf.PRIM&&S.inf.PRIM.kind==='basic'?S.inf.PRIM:(S.inf.PRIM?S.inf.PRIM:null),'PRIM'); }},
+    {t:'Data Lock',r:S.set.lock?'L'+S.set.lock:'off',act:()=>dataLockMenu()},
+    {t:'KVO Mode',r:S.set.kvo?'ON':'OFF',act:()=>yn('KVO MODE',S.set.kvo,v=>{S.set.kvo=v;ev('option',{key:'kvo',val:v});})},
+    {t:'Contrast',r:S.set.contrast+'/9',act:()=>lvl('Contrast','contrast',v=>'level '+v)},
+    {t:'Display Light',r:S.set.light+'/9',act:()=>lvl('Display light','light',v=>'level '+v)},
+    {t:'Keypad Light',r:S.set.keyLight+'/9',act:()=>lvl('Keypad light','keyLight',v=>'level '+v)},
+    {t:'Bolus Rate',r:S.set.bolusRate+' mL/h',act:()=>edit({label:'Manual bolus rate',unit:'mL/h',val:S.set.bolusRate,dec:0,int:4,hl:1,hh:1200,field:'bolrate',onOk:v=>{S.set.bolusRate=v;save();ev('option',{key:'bolusRate',val:v});}})},
+    {t:'Bolus tone each 1 mL',r:S.set.bolTone?'ON':'OFF',act:()=>yn('BOLUS TONE',S.set.bolTone,v=>{S.set.bolTone=v;})},
+    {t:'Date / Time',r:'▸',act:()=>dateTime()},
+    {t:'Macro Mode',r:S.set.macro?'ON':'OFF',act:()=>yn('MACRO MODE',S.set.macro,v=>{S.set.macro=v;},['Large rate on run screen.'])},
+    {t:'Wireless Activation',r:S.set.wireless?'ON':'OFF',act:()=>yn('WIRELESS',S.set.wireless,v=>{S.set.wireless=v;})}
+  ];
+  go('list',listUi('Options',items));
+}
+function dateTime(){
+  const d=now();
+  go('fields',{title:'Date / Time (Y-M-D h:m)',i:0,fields:[
+    {lab:'Year',v:d.getFullYear(),min:2020,max:2099,w:4,sep:'-'},{lab:'Month',v:d.getMonth()+1,min:1,max:12,sep:'-'},{lab:'Day',v:d.getDate(),min:1,max:31,sep:'  '},
+    {lab:'Hour',v:d.getHours(),min:0,max:23,sep:':'},{lab:'Minute',v:d.getMinutes(),min:0,max:59}],
+    onOk:v=>{ const t=new Date(v[0],v[1]-1,v[2],v[3],v[4]); S.set.dtOffset=t.getTime()-Date.now(); save(); toast('Date/time saved'); ev('option',{key:'datetime'}); }});
+}
+function dataLockMenu(){
+  const setL=l=>go('fields',{title:'Enter code',i:0,hint:'Default code 9119',fields:[0,1,2,3].map(n=>({lab:'Digit '+(n+1),v:0,min:0,max:9,w:1})),
+    onOk:v=>{ if(v.join('')===S.set.lockCode){ S.set.lock=l; save(); ev('option',{key:'lock',val:l}); toast(l?'Data lock level '+l+' ON':'Data lock OFF'); } else toast('Wrong code'); }});
+  go('list',listUi('Data Lock',[{t:'Off',act:()=>setL(0)},{t:'Level 1',r:'basic keys',act:()=>setL(1)},{t:'Level 2',r:'all keys',act:()=>setL(2)}]));
+}
+function lockPrompt(){
+  go('fields',{title:'DATA LOCK - code',i:0,fields:[0,1,2,3].map(n=>({lab:'Digit '+(n+1),v:0,min:0,max:9,w:1})),
+    onOk:v=>{
+      if(v.join('')===S.set.lockCode){ S.unlockedUntil=Date.now()+120000; S.lockFails=0; toast('Unlocked for 2 min'); }
+      else { S.lockFails++; toast('Wrong code'); if(S.lockFails>=3){ S.lockFails=0; raise('op','Data lock','Unauthorized access attempt.'); } }
+    }});
+}
+
+/* ---------- standby ---------- */
+function enterStandby(){
+  if(!(S.inf.PRIM||S.inf.SEC)){ toast('Nothing to standby'); return false; }
+  if(S.run!=='stopped'){ toast('Stop infusion first (Start/Stop)'); return false; }
+  const m=S.standbyMin||90;
+  S.standby={left:m*60,total:m*60}; S.run='standby'; ev('standby'); toBase(); return true;
+}
+SC.standby={
+  r(u){
+    const inf=S.inf[S.cur]||S.inf.PRIM;
+    return {tl:'STANDBY',rows:[{t:inf?drugName(inf):'',cls:'hd'},{t:''},{t:'Remaining standby time',cls:'dim'},{h:'<div class="runrate">'+fmtHMS(S.standby?S.standby.left:0)+'</div>'},{t:''},{t:'◀ change time    C cancel',cls:'dim'}],bot:'Alarm sounds when time expires'};
+  },
+  k(k,u){
+    if(k==='l'){ edit({label:'Standby time',unit:'h:mm',time:true,val:Math.round(S.standby.left/60),hl:1,hh:1440,field:'standby',onOk:v=>{ S.standby.left=v*60; S.standbyMin=v; save(); }}); return true; }
+    if(k==='C'){ S.run='stopped'; S.standby=null; ev('standby-cancel'); toBase(); return true; }
+    return true;
+  }
+};
+
+/* ---------- auto-program (m) ---------- */
+function autoProgram(){
+  if(!S.set.wireless){ go('msg',{title:'AUTO-PROGRAM',lines:['Wireless is OFF.','Activate in Options.'],ok:()=>back()}); return; }
+  if(S.inf.PRIM){ go('msg',{title:'AUTO-PROGRAM',lines:['Clear current infusion','before accepting an order.'],ok:()=>back()}); return; }
+  S.order={t0:Date.now()};
+  const d=DRUGS.find(x=>x.id==='ns');
+  go('yesno',{title:'ORDER RECEIVED',lines:['Normal Saline 0.9%','100 mL/h   VTBI 500 mL','','▲ = ACCEPT','▼ = REJECT'],
+    yes:()=>{ S.order=null; if(!S.unit){S.unit='Med-Surg';S.profile='Adult';}
+      const inf=newInf('lib',d,'PRIM'); setField(inf,'rate',100); setField(inf,'vtbi',500); ev('auto-accept'); finishProgram(inf,'PRIM'); },
+    no:()=>{ S.order=null; ev('auto-reject'); toBase(); }});
+}
+
+/* ---------- power-on continue / recall ---------- */
+function continuePrompt(){
+  rep('yesno',{title:'Continue last infusion?',lines:['','▲ = YES','▼ = NO'],
+    yes:()=>recall(), no:()=>{ ev('continue',{yes:false}); toBase(); }});
+}
+function recall(){
+  ev('continue',{yes:true});
+  const L=S.last; S.unit=L.unit; S.profile=L.profile;
+  S.inf.PRIM=unpackInf(L.PRIM); S.inf.SEC=unpackInf(L.SEC);
+  if(!S.inf.PRIM){ toBase(); return; }
+  S.cur='PRIM'; S.act='PRIM';
+  const steps=[];
+  [['PRIM',S.inf.PRIM],['SEC',S.inf.SEC]].forEach(([ctx,inf])=>{
+    if(!inf) return;
+    const rows=[];
+    rows.push('Care unit: '+inf.unit);
+    rows.push('Drug: '+(inf.kind==='basic'?(inf.name||'Basic Infusion'):inf.drug.s));
+    if(concOf(inf)) rows.push('Conc: '+concText(concOf(inf)));
+    if(needsWeight(inf)) rows.push('Weight: '+fmtNum(inf.weight,1)+' kg');
+    if(inf.mode==='D') { rows.push('Dose: '+fmtNum(inf.dose,2)+' '+inf.drug.dot.u); rows.push('Time: '+fmtHM(inf.dotTime)+' h'); }
+    else { if(hasDose(inf)) rows.push('Doserate: '+fmtNum(inf.doserate,inf.drug.dec)+' '+inf.drug.du); rows.push('Rate: '+fmtRate(inf.rate)+' mL/h'); rows.push('VTBI: '+(inf.vtbi>0?fmtVol(inf.vtbi)+' mL':'--')); }
+    rows.forEach(t=>steps.push(next=>go('msg',{title:'CONFIRM '+ctx,lines:[t],bot:'OK = confirm',ok:next})));
+  });
+  seq(steps,()=>{ S.inf.PRIM.vol=0; S.inf.PRIM.elapsed=0; ev('recalled'); toBase(); });
+}
+
+
+/* ---------- IV line change + priming (her pump, from the lab video) ---------- */
+const PRIME_ML=25;
+function lineChange(){
+  ev('linechange');
+  const noCancel=()=>{};
+  go('msg',{title:'⚠ Reminder alarm',cls:'warn',lines:['Keep roller clamp closed','until prompted to open','IV line'],bot:'OK = cancel alarm',cancel:noCancel,ok:()=>{
+    rep('msg',{title:'IV line change activated',lines:['Keep roller clamp closed until','prompted to open IV line','IV line     Original Space Line'],bot:'OK = confirm giving set',cancel:noCancel,ok:()=>{
+      ev('giving-set');
+      rep('msg',{title:'IV line change activated',lines:['Open roller clamp','','IV line     Original Space Line'],bot:'OK = continue',cancel:noCancel,ok:()=>primePrompt()});
+    }});
+  }});
+}
+function primePrompt(){
+  rep('yesno',{title:'Prime IV line?',lines:['Open roller clamp first.'],
+    yes:()=>{ ev('prime',{yes:true}); rep('prime',{t0:Date.now()}); },
+    no:()=>{ ev('prime',{yes:false}); toBase(); }});
+}
+SC.prime={
+  modal:true,
+  r(u){
+    const vol=Math.min(PRIME_ML,(Date.now()-u.t0)/1000*S.speed*PRIME_ML/12);
+    if(vol>=PRIME_ML&&!u.fin){ u.fin=1; setTimeout(()=>{ if(S.ui===u) primeDone(); },30); }
+    const arrows='<div class="arrows"><span>▶</span><span>▶</span><span>▶</span><span>▶</span><span>▶</span></div>';
+    return {tl:'PRIME',rows:[{t:'Prime IV line',cls:'hd'},{h:'<div class="runrate">'+Math.max(0,Math.round(PRIME_ML-vol))+'<small> mL left</small></div>'},{h:arrows}],bot:'OK = stop priming'};
+  },
+  k(k,u){ if(k==='K'){ primeDone(); } return true; }
+};
+function primeDone(){
+  ev('prime-done');
+  rep('yesno',{title:'Prime IV line?',lines:['Repeat prime? Check for bubbles.'],
+    yes:()=>{ ev('prime',{yes:true}); rep('prime',{t0:Date.now()}); },
+    no:()=>{ ev('prime',{yes:false}); toBase(); }});
+}
+/* ===================================================================
+   UI — rendering, input, power, door/line, side panel
+   =================================================================== */
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+S.hold=null;
+
+/* ---------- rendering ---------- */
+function rowHtml(r){
+  if(r.h) return '<div class="row hrow '+(r.cls||'')+'">'+r.h+'</div>';
+  return '<div class="row '+(r.hl?'hl ':'')+(r.dim?'dim ':'')+(r.cls||'')+'"><span class="l">'+esc(r.t)+'</span><span class="r">'+esc(r.r||'')+'</span></div>';
+}
+function alarmHtml(a){
+  const lab={dev:'DEVICE ALARM',op:'ALARM',pre:'PRE-ALARM',rem:'REMINDER'}[a.type];
+  const hint=a.type==='dev'?'Press ON/OFF to restart':'Press OK to acknowledge';
+  const more=S.alarms.length>1?'<div class="more">+'+(S.alarms.length-1)+' more</div>':'';
+  return '<div class="alarmov '+a.type+'"><div class="alab">'+lab+(a.code?'  '+esc(a.code):'')+'</div><div class="amsg">'+esc(a.msg)+'</div><div class="asub">'+esc(a.sub||'')+'</div><div class="ahint">'+hint+'</div>'+more+'</div>';
+}
+let lastHtml='';
+function draw(){
+  const lcd=$('#lcd'); if(!lcd) return;
+  const body=$('#lcdBody');
+  let tl='',tc='',tr='',bot='',html='',bat='';
+  if(S.power==='off'){
+    html=''; lcd.classList.add('off');
+  } else {
+    lcd.classList.remove('off');
+    const u=S.ui||{id:'landing'};
+    const sc=SC[S.power==='boot'?'boot':u.id]||SC.landing;
+    const v=sc.r(u)||{rows:[]};
+    tl=v.tl||''; tc=v.tc||''; tr=v.tr||''; bot=v.bot||'';
+    html=(v.rows||[]).map(rowHtml).join('');
+    if(S.power==='on'){
+      bat=S.ac?'<span class="ac">⚡AC</span>':'';
+      bat+='<i class="bat'+(S.batt<20?' low':'')+'"><b style="width:'+Math.round(S.batt)+'%"></b></i><span>'+Math.round(S.batt)+'%</span>';
+      if(S.alarms.length) html=alarmHtml(S.alarms[0]);
+    }
+  }
+  if(S.power==='on'&&!S.alarms.length&&S.toast) bot='<span class="toast">'+esc(S.toast)+'</span>';
+  else bot=esc(bot);
+  $('#lcdTl').textContent=tl; $('#lcdTc').textContent=tc; $('#lcdTr').textContent=tr;
+  $('#lcdBat').innerHTML=bat;
+  if(html!==lastHtml){ body.innerHTML=html; lastHtml=html; }
+  $('#lcdBot').innerHTML=bot;
+  // hold bar
+  const hb=$('#holdbar');
+  if(S.hold!=null){ hb.style.display='block'; $('#holdfill').style.width=Math.min(100,S.hold*100)+'%'; $('#holdlab').textContent=S.power==='off'?'Hold to power ON':'Hold ON/OFF'; }
+  else hb.style.display='none';
+  // LEDs
+  const run=S.power==='on'&&(S.run==='infusing'||S.run==='kvo');
+  const red=S.power==='on'&&S.alarms.some(a=>a.type==='op'||a.type==='dev');
+  const yel=S.power==='on'&&S.alarms.some(a=>a.type==='pre'||a.type==='rem');
+  $('#ledG').className='led g'+(run?' blink':'');
+  $('#ledR').className='led r'+(red?' blink fast':'');
+  $('#ledY').className='led y'+(yel?' on':'');
+  $('#ledB').className='led b'+(S.power==='on'&&S.set.wireless?' pulse':'');
+  if(S.power==='boot') $$('.led').forEach(l=>l.classList.add('flash1'));
+  // LCD look
+  lcd.style.setProperty('--ct',0.6+S.set.contrast*0.1);
+  lcd.style.setProperty('--br',0.45+S.set.light*0.08);
+  $('#rig').style.setProperty('--kl',S.set.keyLight/9);
+  // door / line / clamp
+  $('#doorGfx').className='doorgfx'+(S.door==='open'?' open':'')+(S.line?' hasline':'');
+  $('#btnLine').textContent=S.line?'Remove IV line':'Insert IV line';
+  $('#btnLine').disabled=S.door!=='open';
+  $('#btnClamp').textContent='Clamp: '+(S.clamp?'open':'CLOSED');
+  $('#btnClamp').classList.toggle('bad',!S.clamp);
+  $('#doorTxt').textContent='Door '+(S.door==='open'?'OPEN':'closed')+(S.line?' · line in':'');
+  $('#acBtn').textContent=S.ac?'AC: plugged in':'AC: unplugged';
+  $('#acBtn').classList.toggle('on',S.ac);
+  syncSound();
+}
+
+/* ---------- key dispatch ---------- */
+function lockBlocked(k){
+  const L=S.set.lock; if(!L||Date.now()<S.unlockedUntil) return false;
+  const id=S.ui.id; if(id==='fields') return false;
+  if(L===1) return (id==='home'||id==='run'||id==='landing')&&(k==='l'||k==='nb'||k==='x'||k==='m'||(k==='K'&&id!=='run'));
+  if(L===2) return !((k==='sf'&&(S.run==='infusing'||S.run==='kvo')));
+  return false;
+}
+function press(k){
+  snd.init(); S.lastAct=Date.now(); S.remFlag.prog=false;
+  if(S.power!=='on') return;
+  snd.key();
+  if(S.alarms.length){ if(k==='K') ackAlarm(); draw(); return; }
+  if(lockBlocked(k)){ lockPrompt(); return; }
+  const u=S.ui, sc=SC[u.id]; let used=false;
+  if(sc&&sc.k) used=sc.k(k,u);
+  if(!used&&!(sc&&sc.modal)) globalKey(k);
+  draw();
+}
+function globalKey(k){
+  const id=S.ui.id, base=(id==='home'||id==='run'||id==='landing'||id==='standby');
+  if(k==='sf'){ if(S.run==='infusing'||S.run==='kvo'||base) sfKey(); }
+  else if(k==='nb'){ if(base) bolusMenu(); }
+  else if(k==='x'){ if(base) doorKey(); }
+  else if(k==='m'){ if(base) autoProgram(); }
+}
+function sfKey(){
+  if(S.run==='infusing'||S.run==='kvo'){
+    if(S.act===S.cur||!S.inf[S.cur]){ stopInfusion(); return; }
+    const inf=S.inf[S.cur];
+    if(!programmedOK(inf)){ stopInfusion(); return; }
+    if(S.cur==='SEC'&&!inf.secChecked){ go('secrem'); return; }
+    startInfusion(); return;
+  }
+  if(S.run==='standby'){ toast('Cancel standby first (C)'); return; }
+  const inf=S.inf[S.cur];
+  if(!inf||!programmedOK(inf)){ toast('Programming incomplete'); return; }
+  if(S.phase==='BOLUS'&&S.bol&&S.cur==='PRIM'){ S.run='infusing'; ev('bolus-resume'); toBase(); return; }
+  if(S.cur==='SEC'&&!inf.secChecked){ go('secrem'); return; }
+  startInfusion();
+}
+function doorKey(){
+  if(S.power!=='on'){ S.door=S.door==='open'?'closed':'open'; ev('door',{open:S.door==='open'}); draw(); return; }
+  if(S.run==='infusing'||S.run==='kvo'){ toast('Stop infusion first'); return; }
+  if(S.door==='closed'){
+    go('yesno',{title:'Opening door.',lines:['IV line clamped?'],
+      yes:()=>{ S.door='open'; ev('door',{open:true}); back(); toast('Door open'); },no:()=>back()});
+  } else closeDoor();
+}
+function closeDoor(){
+  if(S.door!=='open') return;
+  if(S.run==='infusing'||S.run==='kvo') return;
+  S.door='closed'; ev('door',{open:false});
+  if(S.power==='on'){
+    if(S.line&&!S.clip) raise('op','Danger of FreeFlow - Clamp IV line','Anti-free-flow clip not engaged. Clamp line now.');
+    else if(S.line&&S.newLine){ S.newLine=false; lineChange(); }
+    else toast('Door closed');
+  }
+  draw();
+}
+function toggleLine(){
+  if(S.door!=='open') return;
+  S.line=!S.line; S.newLine=S.line; ev('line',{in:S.line}); draw();
+}
+
+/* ---------- power ---------- */
+function powerOn(){
+  S.power='boot'; S.alarms=[]; S.run='stopped'; S.phase=null; S.man=null; S.bol=null; S.hold=null;
+  S.ui={id:'boot'}; S.stack=[]; snd.on(); draw();
+  setTimeout(()=>{
+    $$('.led').forEach(l=>l.classList.remove('flash1'));
+    S.power='on'; ev('poweron');
+    if(S.last&&S.last.PRIM){ S.ui={id:'landing'}; continuePrompt(); } else toBase();
+    S.lastAct=Date.now(); draw();
+  },2800);
+}
+function powerHoldDone(){
+  if(S.power==='off'){ powerOn(); return; }
+  if(S.power!=='on') return;
+  if(S.alarms.some(a=>a.type==='dev')){ restartDevice(); return; }
+  if(S.run==='infusing'||S.run==='kvo'){ toast('Stop infusion first (Start/Stop)'); return; }
+  if(S.line){ toast('Remove IV line to power off',3500); if(S.inf.PRIM||S.inf.SEC) enterStandby(); return; }
+  powerOff();
+}
+function powerShort(){
+  if(S.power!=='on') return;
+  if(S.alarms.some(a=>a.type==='dev')){ restartDevice(); return; }
+  if(S.run==='infusing'||S.run==='kvo') toast('Stop first. Hold ON/OFF 3 s = Standby',3200);
+  else toast('Hold ON/OFF 3 seconds');
+}
+function restartDevice(){
+  snd.setAlarm(null); S.alarms=[]; S.power='off'; draw(); setTimeout(powerOn,400);
+}
+
+/* ---------- button binding ---------- */
+function cap(el,e){ try{ el.setPointerCapture(e.pointerId); }catch(_){} }
+function bindButtons(){
+  $$('[data-k]').forEach(el=>{
+    const k=el.dataset.k;
+    el.addEventListener('contextmenu',e=>e.preventDefault());
+    const up=()=>el.classList.remove('down');
+    el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); el.addEventListener('pointerleave',up);
+    if(k==='pw') return bindPw(el);
+    if(k==='nb') return bindNb(el);
+    if(k==='r') return bindR(el);
+    el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.classList.add('down'); press(k); });
+  });
+}
+function bindPw(el){
+  let raf=0,t0=0,active=false,done=false;
+  const loop=()=>{ if(!active) return; const p=(performance.now()-t0)/3000; S.hold=p;
+    if(p>=1){ active=false; done=true; S.hold=null; draw(); powerHoldDone(); return; }
+    draw(); raf=requestAnimationFrame(loop); };
+  el.addEventListener('pointerdown',e=>{ e.preventDefault(); cap(el,e); el.classList.add('down'); snd.init(); snd.key(); active=true; done=false; t0=performance.now(); S.hold=0; raf=requestAnimationFrame(loop); });
+  const end=()=>{ el.classList.remove('down'); if(active){ active=false; cancelAnimationFrame(raf); S.hold=null; powerShort(); draw(); } };
+  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+}
+function bindNb(el){
+  let timer=0,manual=false,fired=false;
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault(); cap(el,e); el.classList.add('down'); snd.init();
+    manual=false; fired=false;
+    timer=setTimeout(()=>{
+      fired=true;
+      if(S.power==='on'&&!S.alarms.length&&!lockBlocked('nb')){
+        const base=['home','run','landing'].includes(S.ui.id);
+        if(base&&startManual()){ manual=true; go('manbol'); }
+      }
+    },600);
+  });
+  const end=()=>{
+    el.classList.remove('down'); clearTimeout(timer);
+    if(manual){ manual=false; endManual(); draw(); }
+    else if(!fired){ fired=true; press('nb'); }
+  };
+  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+}
+function bindR(el){
+  let timer=0,fired=false;
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault(); cap(el,e); el.classList.add('down'); fired=false;
+    timer=setTimeout(()=>{ if(S.power==='on'&&(S.run==='infusing')){ fired=true; S.set.macro=!S.set.macro; save(); snd.key(); toast('Macro mode '+(S.set.macro?'ON':'OFF')); } },1200);
+  });
+  const end=()=>{ el.classList.remove('down'); clearTimeout(timer); if(!fired&&timer){ timer=0; press('r'); } };
+  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+}
+/* desktop keyboard shortcuts */
+const KEYMAP={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',Enter:'K',k:'K',Escape:'C',Backspace:'C',c:'C',' ':'sf',s:'sf',x:'x',m:'m'};
+let kbNb=null;
+window.addEventListener('keydown',e=>{
+  if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  const key=e.key.length===1?e.key.toLowerCase():e.key;
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(e.repeat){ if(KEYMAP[key]||key==='b') e.preventDefault(); return; }
+  if(key==='b'){ const el=document.querySelector('[data-k=nb]'); el.dispatchEvent(new PointerEvent('pointerdown')); kbNb=el; e.preventDefault(); return; }
+  if(key==='p'){ const el=document.querySelector('[data-k=pw]'); el.dispatchEvent(new PointerEvent('pointerdown')); kbNb=el; e.preventDefault(); return; }
+  const k=KEYMAP[key]; if(k){ e.preventDefault(); const el=document.querySelector('[data-k="'+k+'"]'); el.classList.add('down'); setTimeout(()=>el.classList.remove('down'),100); if(k==='r'||k==='nb') press(k); else press(k); }
+});
+window.addEventListener('keyup',e=>{ if((e.key==='b'||e.key==='p')&&kbNb){ kbNb.dispatchEvent(new PointerEvent('pointerup')); kbNb=null; } });
+
+/* ---------- layout scaling ---------- */
+function fit(){
+  const wide=window.innerWidth>=1200;
+  document.body.classList.toggle('wide',wide);
+  const availW=wide?window.innerWidth-400:window.innerWidth, availH=window.innerHeight;
+  const rig=$('#rig'), wrap=$('#pumpWrap');
+  const port=availW/availH<1.15;
+  rig.classList.toggle('port',port); rig.classList.toggle('land',!port);
+  rig.style.transform='none';
+  const w=rig.offsetWidth, h=rig.offsetHeight;
+  let s=port?Math.min(availW/w,(availH-6)/h):Math.min((availW-12)/w,(availH-12)/h); s=Math.max(0.4,Math.min(s,1.9));
+  rig.style.transform='scale('+s+')';
+  wrap.style.width=w*s+'px'; wrap.style.height=h*s+'px';
+}
+window.addEventListener('resize',fit); window.addEventListener('orientationchange',fit);
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>{ if(!/INPUT|SELECT/.test(e.target.tagName)) e.preventDefault(); },{passive:false});
+
+/* ---------- side panel ---------- */
+function hardReset(){
+  clearTimeout(window._scnTimer);
+  snd.setAlarm(null);
+  S.power='off'; S.run='stopped'; S.phase=null; S.bol=null; S.man=null; S.alarms=[]; S.ui=null; S.stack=[];
+  S.inf={PRIM:null,SEC:null}; S.cur='PRIM'; S.act='PRIM'; S.standby=null; S.toast=null; S.hold=null;
+  S.door='closed'; S.line=false; S.clamp=true; S.clip=true; S.unit=null; S.profile=null; S.order=null; S.bolPending=null;
+  S.totals={prim:0,sec:0}; S.volTotal=0; S.prevSec=[]; S.last=null; S.remFlag={}; S.lastBolus=null; S.batt=100; S.homeI={PRIM:0,SEC:0}; S.statusIdx=0; S.standbyMin=0; S.secMode='auto'; S.newLine=false;
+  draw();
+}
+function bindPanel(){
+  $$('[data-speed]').forEach(b=>b.addEventListener('click',()=>{ S.speed=+b.dataset.speed; $$('[data-speed]').forEach(x=>x.classList.toggle('on',x===b)); }));
+  $('#acBtn').addEventListener('click',()=>{ S.ac=!S.ac; draw(); });
+  $('#btnLine').addEventListener('click',toggleLine);
+  $('#btnClamp').addEventListener('click',()=>{ S.clamp=!S.clamp; ev('clamp',{open:S.clamp}); draw(); });
+  $('#doorGfx').addEventListener('click',()=>{ if(S.door==='open') closeDoor(); else if(S.power!=='on'||!S.alarms.length) doorKey(); });
+  $('#clipChk').addEventListener('change',e=>{ S.clip=e.target.checked; });
+  const sel=$('#faultSel');
+  FAULTS.forEach((f,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=({op:'Operating',pre:'Pre-alarm',rem:'Reminder',dev:'Device'}[f.t])+': '+f.msg; sel.appendChild(o); });
+  $('#faultBtn').addEventListener('click',()=>{
+    if(S.power!=='on'){ toast('Power on the pump first'); return; }
+    const f=FAULTS[+sel.value]; raise(f.t,f.msg,f.sub,{code:f.code});
+  });
+  $('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset the pump and clear everything?')){ exam.stop(); hardReset(); } });
+  $('#panelBtn').addEventListener('click',()=>document.body.classList.toggle('panelopen'));
+  $('#panelClose').addEventListener('click',()=>document.body.classList.remove('panelopen'));
+}
+
+/* ---------- boot ---------- */
+window.addEventListener('DOMContentLoaded',()=>{
+  loadStore(); bindButtons(); bindPanel(); exam.init(); fit(); draw(); exam.start(0);
+  setInterval(()=>{ tick(); draw(); },250);
+  setInterval(()=>{ if(S.power==='on') save(); },5000);
+  window.addEventListener('beforeunload',save);
+});
+/* ===================================================================
+   SCENARIOS + SCORING  (edit/add scenarios freely)
+   step = {t:'text shown in report', ev:'event type', where:{field:value}}
+   =================================================================== */
+'use strict';
+function fastOn(o){
+  o=o||{}; hardReset();
+  S.power='on'; S.line=o.line!==false; S.door='closed'; S.ui=null;
+  S.lastAct=Date.now(); toBase();
+}
+function quickInf(o){
+  S.unit=o.unit; S.profile=o.profile||'Adult';
+  const d=DRUGS.find(x=>x.id===o.drug);
+  const inf=newInf('lib',d,'PRIM'); inf.concIdx=o.conc||0; if(o.mode) inf.mode=o.mode; inf.weight=o.weight||0;
+  if(o.doserate!=null) setField(inf,'doserate',o.doserate);
+  if(o.rate!=null) setField(inf,'rate',o.rate);
+  if(o.vtbi!=null) setField(inf,'vtbi',o.vtbi);
+  inf.vtbi0=inf.vtbi; inf.time0=inf.time; inf.lim=inf.vtbi>0;
+  S.inf.PRIM=inf; S.inf.SEC=null; S.cur='PRIM'; S.act='PRIM';
+  if(o.start){ S.run='infusing'; }
+  toBase();
+}
+function quickIvf(o){
+  S.unit='Med-Surg'; S.profile='Adult';
+  const inf=newInf('basic',null,'PRIM'); inf.ivf=true; inf.name='IV fluid'; inf.unit=S.unit; inf.profile=S.profile;
+  setField(inf,'rate',o.rate); setField(inf,'vtbi',o.vtbi);
+  inf.vtbi0=inf.vtbi; inf.time0=inf.time; inf.lim=inf.vtbi>0;
+  S.inf.PRIM=inf; S.inf.SEC=null; S.cur='PRIM'; S.act='PRIM';
+  if(o.start) S.run='infusing';
+  toBase();
+}
+const SCENARIOS=[
+ {ret:true,id:'ret-full',title:'FULL DEMO: load line, prime, primary, secondary',
+  brief:'Pump is on with no line. Do the whole demo: open the door and load the line, confirm the giving set and prime, then program Med / Surg IV fluid 125 ml/h with VTBI 500 ml and start. Then set Back to PRIM to manual and add a secondary, Intermittent (other), of 260 ml/h, VTBI 130 ml, and start it.',
+  setup(){ fastOn({line:false}); },
+  steps:[
+   {t:'Press the door key and answer ▲ Yes to "IV line clamped?"',ev:'door',where:{open:true}},
+   {t:'Insert the IV line (white clip, 2nd clip, green lever down, anti-free-flow clip)',ev:'line',where:{in:true}},
+   {t:'Close the door firmly',ev:'door',where:{open:false}},
+   {t:'Clear the reminder alarm and confirm the giving set (OK)',ev:'giving-set'},
+   {t:'Answer ▲ Yes to Prime IV line?',ev:'prime',where:{yes:true}},
+   {t:'Stop priming with OK (or let it finish)',ev:'prime-done'},
+   {t:'Check for bubbles, then ▼ No to repeating the prime',ev:'prime',where:{yes:false}},
+   {t:'OK to program, select care unit Med / Surg',ev:'careunit',where:{name:'Med-Surg'}},
+   {t:'Select IV fluid from the list',ev:'ivfluid',where:{ctx:'PRIM'}},
+   {t:'Enter Rate 125 ml/h',ev:'param',where:{field:'rate',val:125,ctx:'PRIM'}},
+   {t:'Enter VTBI 500 ml (Time calculates 4 h)',ev:'param',where:{field:'vtbi',val:500,ctx:'PRIM'}},
+   {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}},
+   {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
+   {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
+   {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
+   {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
+   {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
+   {t:'Secondary is running',ev:'start',where:{ctx:'SEC'}},
+  ],
+  walk:'Door key (far right) > ▲ Yes (IV line clamped) > Insert IV line (button under the pump) > close door > OK (clear reminder) > OK (confirm giving set) > OK (open roller clamp) > ▲ Yes (prime) > OK to stop at ~5 mL left > check for bubbles > ▼ No. THEN: OK at the home screen > Med / Surg (OK) > ▼ to IV fluid, OK > Rate: OK, ◀ to hundreds, ▲ 1, ◀... enter 125, OK > ▼ to VTBI, OK, enter 500, OK > Time shows 4h > Start/Stop. THEN: On the primary screen scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
+ {ret:true,id:'ret-prim',title:'Primary IV fluid: 125 ml/h, VTBI 500 ml',
+  brief:'The line is loaded and primed. Program a primary IV fluid for a Med / Surg patient: rate 125 ml/h, volume to be infused 500 ml, then start.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'OK to program, select care unit Med / Surg',ev:'careunit',where:{name:'Med-Surg'}},
+   {t:'Select IV fluid from the list',ev:'ivfluid',where:{ctx:'PRIM'}},
+   {t:'Enter Rate 125 ml/h',ev:'param',where:{field:'rate',val:125,ctx:'PRIM'}},
+   {t:'Enter VTBI 500 ml (Time calculates 4 h)',ev:'param',where:{field:'vtbi',val:500,ctx:'PRIM'}},
+   {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}},
+  ],
+  walk:'OK at the home screen > Med / Surg (OK) > ▼ to IV fluid, OK > Rate: OK, ◀ to hundreds, ▲ 1, ◀... enter 125, OK > ▼ to VTBI, OK, enter 500, OK > Time shows 4h > Start/Stop.'},
+ {ret:true,id:'ret-sec',title:'Secondary Intermittent (other): 260 ml/h, VTBI 130 ml',
+  brief:'A primary IV fluid (125 ml/h, 500 ml) is running. Set Back to PRIM to manual, then program a secondary, Intermittent (other), at 260 ml/h with VTBI 130 ml (30 min) and start it.',
+  setup(){ fastOn(); quickIvf({rate:125,vtbi:500,start:true}); },
+  steps:[
+   {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
+   {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
+   {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
+   {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
+   {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
+   {t:'Secondary is running',ev:'start',where:{ctx:'SEC'}},
+  ],
+  walk:'On the primary screen scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
+ {ret:true,id:'ret-line',title:'Load the IV line and prime',
+  brief:'The pump is on and the door is closed with no line. Open the door, load the line, close the door, confirm the giving set and prime the line.',
+  setup(){ fastOn({line:false}); },
+  steps:[
+   {t:'Press the door key and answer ▲ Yes to "IV line clamped?"',ev:'door',where:{open:true}},
+   {t:'Insert the IV line (white clip, 2nd clip, green lever down, anti-free-flow clip)',ev:'line',where:{in:true}},
+   {t:'Close the door firmly',ev:'door',where:{open:false}},
+   {t:'Clear the reminder alarm and confirm the giving set (OK)',ev:'giving-set'},
+   {t:'Answer ▲ Yes to Prime IV line?',ev:'prime',where:{yes:true}},
+   {t:'Stop priming with OK (or let it finish)',ev:'prime-done'},
+   {t:'Check for bubbles, then ▼ No to repeating the prime',ev:'prime',where:{yes:false}},
+  ],
+  walk:'Door key (far right) > ▲ Yes (IV line clamped) > Insert IV line (button under the pump) > close door > OK (clear reminder) > OK (confirm giving set) > OK (open roller clamp) > ▲ Yes (prime) > OK to stop at ~5 mL left > check for bubbles > ▼ No.'},
+ {id:'morph',title:'Morphine 2 mcg/kg/h, 70 kg (ICU)',
+  brief:'Program Morphine 1 mg/mL at 2 mcg/kg/h for a 70 kg ADULT patient in the ICU, VTBI 50 mL, then start the infusion. (Pump is on, IV line loaded.)',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select care unit ICU',ev:'careunit',where:{name:'ICU'}},
+   {t:'Select patient profile Adult',ev:'profile',where:{name:'Adult'}},
+   {t:'Select drug Morphine',ev:'drug',where:{id:'morph',ctx:'PRIM'}},
+   {t:'Select concentration 1 mg/mL',ev:'conc',where:{idx:0}},
+   {t:'Enter patient weight 70 kg',ev:'weight',where:{kg:70}},
+   {t:'Enter doserate 2 mcg/kg/h',ev:'param',where:{field:'doserate',val:2}},
+   {t:'Enter VTBI 50 mL',ev:'param',where:{field:'vtbi',val:50}},
+   {t:'Press Start/Stop to start',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'OK at landing > ICU (OK) > Adult (OK) > Pediatric/Adult... > Analgesia or All Drugs > Morphine (OK) > 1 mg/mL (OK) > weight: ◀ to tens, ▲ x7, OK > Doserate: ▲ x2, OK > scroll ▼ to VTBI, OK, ◀ to tens, ▲ x5, OK > Start/Stop.'},
+ {id:'vanc',title:'Vancomycin 500 mg over 60 min as SEC',
+  brief:'A primary Normal Saline is running (Med-Surg, adult). Set up Vancomycin 500 mg / 100 mL to run over 60 minutes as a secondary (piggyback) infusion and start it.',
+  setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
+  steps:[
+   {t:'Open SECondary > New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Select drug Vancomycin (secondary)',ev:'drug',where:{id:'vanc',ctx:'SEC'}},
+   {t:'Select concentration 500 mg / 100 mL',ev:'conc',where:{idx:0}},
+   {t:'Enter total dose 500 mg',ev:'param',where:{field:'dose',val:500}},
+   {t:'Enter total time 1:00',ev:'param',where:{field:'dotTime',val:60}},
+   {t:'Confirm CHECK BAG HEIGHT / UNCLAMP SECONDARY reminder',ev:'sec-reminder-ok'},
+   {t:'Start the secondary',ev:'start',where:{ctx:'SEC'}}],
+  walk:'C (to Home) > scroll to SECondary, OK > New SECondary > category/drug Vancomycin > 500 mg/100 mL > Total dose 500, OK > Total time 1:00, OK > Start/Stop > CHECK BAG HEIGHT reminder: Start/Stop again.'},
+ {id:'mgload',title:'Mg Sulfate loading dose 4 g / 20 min, then 1 g/h',
+  brief:'Program Magnesium Sulfate 20 g / 500 mL for an adult in Med-Surg: a LOADING dose of 4 g over 20 minutes, then continuous at 1 g/h. Start the infusion.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select care unit Med-Surg',ev:'careunit',where:{name:'Med-Surg'}},
+   {t:'Select profile Adult',ev:'profile',where:{name:'Adult'}},
+   {t:'Select drug Magnesium Sulfate',ev:'drug',where:{id:'mg',ctx:'PRIM'}},
+   {t:'Select concentration 20 g / 500 mL',ev:'conc',where:{idx:1}},
+   {t:'Select mode Continuous',ev:'mode',where:{mode:'C'}},
+   {t:'Answer YES to Program Loading Dose',ev:'loadq',where:{yes:true}},
+   {t:'Enter loading dose 4 g',ev:'param',where:{field:'loaddose',val:4}},
+   {t:'Enter loading time 0:20',ev:'param',where:{field:'loadtime',val:20}},
+   {t:'Enter continuous doserate 1 g/h',ev:'param',where:{field:'doserate',val:1}},
+   {t:'Start (LOAD dose and Start)',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'Med-Surg > Adult > Electrolyte > Magnesium Sulf > acknowledge advisory (OK) > 20 g/500 mL > Continuous > ▲ = YES loading > 4.00, OK > 0:20, OK > Doserate 1.00, OK > Start/Stop.'},
+ {id:'norepi',title:'Norepinephrine 0.1 mcg/kg/min, 65 kg',
+  brief:'Program Norepinephrine 4 mg / 250 mL at 0.1 mcg/kg/min for a 65 kg ADULT in the ICU and start it.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select care unit ICU',ev:'careunit',where:{name:'ICU'}},
+   {t:'Select profile Adult',ev:'profile',where:{name:'Adult'}},
+   {t:'Select drug Norepinephrine',ev:'drug',where:{id:'norepi',ctx:'PRIM'}},
+   {t:'Enter weight 65 kg',ev:'weight',where:{kg:65}},
+   {t:'Enter doserate 0.1 mcg/kg/min',ev:'param',where:{field:'doserate',val:0.1}},
+   {t:'Start',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'ICU > Adult > Vasoactive > Norepinephrine > confirm HIGH ALERT advisory (OK) > weight 65 > Doserate 0.10 > OK > Start/Stop. Rate should read 24.4 mL/h.'},
+ {id:'occl',title:'Respond to a downstream occlusion alarm',
+  brief:'Normal Saline is infusing. In a few seconds a pump alarm will sound. Respond correctly: acknowledge the alarm, then restart the infusion.',
+  setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true});
+    window._scnTimer=setTimeout(()=>raise('op','Downstream occlusion','Check line/clamps downstream of pump. Relieve pressure.'),6000); },
+  steps:[
+   {t:'Acknowledge Downstream occlusion alarm (OK)',ev:'ack',where:{msg:'Downstream occlusion'}},
+   {t:'Restart infusion with Start/Stop',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'Red LED/alarm: assess patient and line (kinks, clamps, IV site), press OK, fix cause, then press Start/Stop to restart.'},
+ {id:'unit',title:'Switch ICU > Med-Surg while Morphine runs',
+  brief:'Morphine (ICU, adult, 70 kg, 2 mcg/kg/h) is infusing. The patient is transferred to Med-Surg. Change the care unit on the pump to Med-Surg and keep the infusion going.',
+  setup(){ fastOn(); quickInf({unit:'ICU',drug:'morph',weight:70,doserate:2,vtbi:100,start:true}); },
+  steps:[
+   {t:'Answer YES to the soft-limit override prompt',ev:'override',where:{yes:true,field:'unit'}},
+   {t:'Care unit changed to Med-Surg',ev:'unit-change',where:{to:'Med-Surg',result:'soft-override'}}],
+  walk:'C (Home) > scroll to Change Care Unit, OK > Med-Surg, OK > SOFT LIMIT prompt (Med-Surg upper soft limit is lower): ▲ = YES to override.'},
+ {id:'hydrobol',title:'Hydromorphone 0.2 mg bolus over 15 min',
+  brief:'Hydromorphone 2 mg/mL is infusing (ICU, adult, 70 kg). Program a bolus of 0.2 mg over 15 minutes and start it.',
+  setup(){ fastOn(); quickInf({unit:'ICU',drug:'hydro',weight:70,doserate:5,vtbi:50,start:true}); },
+  steps:[
+   {t:'Open the programmed bolus menu (tap BOL)',ev:'bolus-menu'},
+   {t:'Enter bolus dose 0.2 mg',ev:'param',where:{field:'boldose',val:0.2,unit:'mg'}},
+   {t:'Enter bolus time 0:15',ev:'param',where:{field:'boltime',val:15}},
+   {t:'Press BOL to start the bolus',ev:'bolus-start',where:{kind:'prog'}}],
+  walk:'Tap BOL > Program bolus dose and time (OK) > unit mg (OK) > 0.20 mg, OK > 0:15, OK > BOL again to start.'},
+ {id:'basic',title:'Basic saline 125 mL/h, VTBI 1000 mL',
+  brief:'Set up a BASIC infusion (outside the drug library) of 125 mL/h with a VTBI of 1000 mL and start it. Do not use the dose rate calculator.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select Basic Infusion',ev:'basic'},
+   {t:'Confirm continue without limits (YES)',ev:'basic-continue'},
+   {t:'Enter rate 125 mL/h',ev:'param',where:{field:'rate',val:125}},
+   {t:'Enter VTBI 1000 mL',ev:'param',where:{field:'vtbi',val:1000}},
+   {t:'Start',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'Landing OK > Basic Infusion > OK (warning) > ▲ (continue) > ▼ (no calculator) > Rate 125, OK > VTBI 1000, OK > Time auto-calculates (8:00) > Start/Stop.'},
+ {id:'standby',title:'Put the pump in Standby',
+  brief:'Normal Saline is infusing. The patient is going for a test. Stop the infusion and place the pump in Standby.',
+  setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
+  steps:[
+   {t:'Stop the infusion (Start/Stop)',ev:'stop'},
+   {t:'Enter Standby (hold ON/OFF 3 s)',ev:'standby'}],
+  walk:'Start/Stop to stop, then press and hold ON/OFF for 3 seconds: standby timer appears (◀ to change time).'},
+ {id:'endtx',title:'End of therapy: remove line and power off',
+  brief:'The infusion is complete. Stop the pump, open the door, remove the IV line and power the pump off.',
+  setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
+  steps:[
+   {t:'Stop the infusion',ev:'stop'},
+   {t:'Open the door (door button, ▲ = YES)',ev:'door',where:{open:true}},
+   {t:'Remove the IV line',ev:'line',where:{in:false}},
+   {t:'Power off (hold ON/OFF 3 s)',ev:'poweroff'}],
+  walk:'Start/Stop > door button, ▲ > Remove IV line (below the screen) > close door > hold ON/OFF 3 s.'},
+ {id:'hep',title:'Heparin 1000 units/h in Med-Surg (soft limit)',
+  brief:'Program Heparin 25,000 units / 250 mL at 1000 units/h with a VTBI of 250 mL for an adult in Med-Surg. Start the infusion.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select care unit Med-Surg',ev:'careunit',where:{name:'Med-Surg'}},
+   {t:'Select profile Adult',ev:'profile',where:{name:'Adult'}},
+   {t:'Select drug Heparin',ev:'drug',where:{id:'hep',ctx:'PRIM'}},
+   {t:'Override the soft-limit prompt (YES) after verifying the order',ev:'override',where:{yes:true,field:'doserate'}},
+   {t:'Enter doserate 1000 units/h',ev:'param',where:{field:'doserate',val:1000}},
+   {t:'Enter VTBI 250 mL',ev:'param',where:{field:'vtbi',val:250}},
+   {t:'Start',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'Med-Surg > Adult > Heparin > advisory OK > Doserate 1000, OK > SOFT LIMIT prompt: ▲ = YES > VTBI 250, OK > Start/Stop.'},
+ {id:'insulin',title:'Insulin: hit the hard limit, then program 5 units/h',
+  brief:'In the ICU (adult), start programming Insulin Regular. Try entering 25 units/h to see what the pump does, then correctly program 5 units/h and start.',
+  setup(){ fastOn(); },
+  steps:[
+   {t:'Select care unit ICU',ev:'careunit',where:{name:'ICU'}},
+   {t:'Select profile Adult',ev:'profile',where:{name:'Adult'}},
+   {t:'Select drug Insulin Regular',ev:'drug',where:{id:'ins',ctx:'PRIM'}},
+   {t:'Run into the HARD limit (cannot exceed 20 units/h)',ev:'hardlimit',where:{field:'doserate'}},
+   {t:'Enter doserate 5 units/h',ev:'param',where:{field:'doserate',val:5}},
+   {t:'Start',ev:'start',where:{ctx:'PRIM'}}],
+  walk:'Doserate editor: keep pressing ▲ past 20.0: pump stops at the hard limit, then shows VALUE EXCEEDS HARD/DRUG LIMIT - OK reverts. Enter 5.0 instead.'},
+ {id:'kcl',title:'Potassium Chloride 20 mEq over 2 h as SEC',
+  brief:'Normal Saline is running (Med-Surg, adult). Piggyback Potassium Chloride 20 mEq / 100 mL over 2 hours (max 10 mEq/h hard limit) and start it.',
+  setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
+  steps:[
+   {t:'Open SECondary > New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Select drug Potassium Chloride',ev:'drug',where:{id:'kcl',ctx:'SEC'}},
+   {t:'Select concentration 20 mEq / 100 mL',ev:'conc',where:{idx:1}},
+   {t:'Enter total dose 20 mEq',ev:'param',where:{field:'dose',val:20}},
+   {t:'Enter total time 2:00',ev:'param',where:{field:'dotTime',val:120}},
+   {t:'Confirm bag height/unclamp reminder',ev:'sec-reminder-ok'},
+   {t:'Start the secondary',ev:'start',where:{ctx:'SEC'}}],
+  walk:'C > SECondary > New > Electrolyte > Potassium Chl > advisory OK > 20 mEq/100 mL > dose 20, OK > time 2:00, OK (less than 2:00 is blocked by the 10 mEq/h hard limit) > Start/Stop, Start/Stop.'},
+ {id:'titrate',title:'Titrate Dopamine from 5 to 8 mcg/kg/min',
+  brief:'Dopamine is infusing at 5 mcg/kg/min (ICU, adult, 80 kg). The order is changed: titrate to 8 mcg/kg/min without stopping the pump.',
+  setup(){ fastOn(); quickInf({unit:'ICU',drug:'dopa',weight:80,doserate:5,vtbi:250,start:true}); },
+  steps:[
+   {t:'Enter a new doserate while running (◀ to open editor)',ev:'param',where:{field:'doserate'}},
+   {t:'Confirm new doserate 8 mcg/kg/min',ev:'titrate',where:{field:'doserate',val:8}}],
+  walk:'On the run screen press ◀ > change 5.00 to 8.00 (▲ x3 on the ones digit) > OK within 20 s or VALUE NOT CONFIRMED reminder sounds.'}
+];
+
+var exam={
+  sc:null, steps:[], wrong:[], on:false,
+  init(){
+    const sel=$('#scnSel');
+    const g1=document.createElement('optgroup'); g1.label='RETURN DEMO - IV fluids (Med / Surg)';
+    const g2=document.createElement('optgroup'); g2.label='Extra practice - full drug library';
+    SCENARIOS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=(i+1)+'. '+s.title; (s.ret?g1:g2).appendChild(o); });
+    sel.appendChild(g1); sel.appendChild(g2); sel.value='0';
+    const fl=$('#fullLib'); if(fl) fl.addEventListener('change',()=>{ S.fullLib=fl.checked; });
+    sel.addEventListener('change',()=>this.preview());
+    $('#scnStart').addEventListener('click',()=>this.start(+sel.value));
+    $('#scnHint').addEventListener('click',()=>this.hint());
+    $('#scnFinish').addEventListener('click',()=>this.finish());
+    $('#scnFree').addEventListener('click',()=>{ this.stop(); hardReset(); $('#scnBrief').textContent='Free practice: the pump behaves like the real device. Hold ON/OFF 3 s to start.'; });
+    $('#reportClose').addEventListener('click',()=>$('#report').classList.remove('show'));
+    this.preview();
+  },
+  preview(){
+    if(this.on) return;
+    const s=SCENARIOS[+$('#scnSel').value];
+    $('#scnBrief').textContent=s.brief;
+  },
+  start(i){
+    this.sc=SCENARIOS[i]; this.on=true;
+    S.fullLib=!this.sc.ret; { const fl=$('#fullLib'); if(fl) fl.checked=S.fullLib; }
+    this.steps=this.sc.steps.map(s=>Object.assign({state:null},s)); this.wrong=[];
+    this.sc.setup();
+    $('#scnBrief').textContent=this.sc.brief; $('#scnHintTxt').textContent='';
+    $('#scnFinish').disabled=false; $('#scnHint').disabled=false;
+    this.progress(); document.body.classList.remove('panelopen');
+  },
+  stop(){ this.on=false; this.sc=null; this.steps=[]; $('#scnFinish').disabled=true; $('#scnHint').disabled=true; $('#scnProg').textContent=''; $('#scnHintTxt').textContent=''; },
+  match(s,t,d){
+    if(s.ev!==t) return false;
+    if(!s.where) return true;
+    return Object.keys(s.where).every(k=>{
+      const e=s.where[k], v=d[k];
+      if(typeof e==='number') return typeof v==='number'&&Math.abs(v-e)<0.001;
+      return v===e;
+    });
+  },
+  ev(type,data){
+    if(!this.on) return;
+    const pend=this.steps.filter(s=>!s.state);
+    const m=pend.find(s=>this.match(s,type,data));
+    if(m){ m.state='ok'; this.progress(); if(!this.steps.some(s=>!s.state)) $('#scnProg').textContent+='  - all steps done! Press Finish & Score.'; return; }
+    const relevant=pend.some(s=>s.ev===type&&(!s.where||s.where.field==null||s.where.field===data.field));
+    if(relevant){ this.wrong.push({type,data,at:Date.now()}); this.progress(); }
+  },
+  progress(){
+    const ok=this.steps.filter(s=>s.state==='ok').length;
+    $('#scnProg').textContent='Progress: '+ok+' / '+this.steps.length+' steps'+(this.wrong.length?'   Errors: '+this.wrong.length:'');
+  },
+  hint(){
+    const n=this.steps.find(s=>!s.state);
+    $('#scnHintTxt').textContent=n?'Next: '+n.t:'All steps complete - press Finish & Score.';
+  },
+  describeWrong(w){
+    const d=w.data;
+    if(w.type==='param') return 'Entered '+d.field+' = '+d.val+(d.unit?' '+d.unit:'')+' (not what the order asked)';
+    if(w.type==='drug') return 'Selected drug "'+(d.name||d.id)+'" instead of the ordered drug';
+    if(w.type==='careunit') return 'Selected care unit '+d.name;
+    if(w.type==='profile') return 'Selected profile '+d.name;
+    if(w.type==='weight') return 'Entered weight '+d.kg+' kg';
+    if(w.type==='conc') return 'Selected a different concentration: '+d.text;
+    if(w.type==='mode') return 'Selected the wrong infusion mode';
+    if(w.type==='ivfluid') return 'Chose "'+d.name+'" for the '+d.ctx+' (not what the order asked)';
+    if(w.type==='override') return 'Wrong answer to the limit override prompt';
+    if(w.type==='ack') return 'Acknowledged "'+d.msg+'" (not the expected alarm)';
+    if(w.type==='titrate') return 'Titrated '+d.field+' to '+d.val;
+    return w.type+' (unexpected)';
+  },
+  finish(){
+    if(!this.on) return;
+    const ok=this.steps.filter(s=>s.state==='ok').length, tot=this.steps.length;
+    const missed=this.steps.filter(s=>!s.state);
+    const score=Math.max(0,Math.round(100*ok/tot-10*this.wrong.length));
+    let h='<h2>'+esc(this.sc.title)+'</h2>';
+    h+='<div class="score '+(score>=80?'good':score>=60?'mid':'bad')+'">'+score+'%</div>';
+    h+='<div class="tally"><span class="ok">'+ok+' correct</span><span class="bad">'+this.wrong.length+' incorrect</span><span class="miss">'+missed.length+' missed</span></div>';
+    h+='<h3>Step by step</h3><ol class="steps">'+this.steps.map(s=>'<li class="'+(s.state==='ok'?'ok':'miss')+'">'+(s.state==='ok'?'✓ ':'✗ ')+esc(s.t)+'</li>').join('')+'</ol>';
+    if(this.wrong.length) h+='<h3>Incorrect entries</h3><ul class="wrong">'+this.wrong.map(w=>'<li>'+esc(this.describeWrong(w))+'</li>').join('')+'</ul>';
+    h+='<h3>Correct walkthrough</h3><p class="walk">'+esc(this.sc.walk)+'</p>';
+    h+='<p class="small">Scoring: 100 x correct/total, minus 10 per incorrect entry.</p>';
+    $('#reportBody').innerHTML=h; $('#report').classList.add('show');
+    this.on=false; $('#scnFinish').disabled=true;
+  }
+};
+</script></body></html>
