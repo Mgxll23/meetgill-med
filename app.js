@@ -85,55 +85,45 @@
   function req(){ if(!ticking){ ticking=true; requestAnimationFrame(frame); } }
   window.addEventListener('scroll',req,{passive:true}); window.addEventListener('resize',req); frame();
 
-  /* ---------- pinned four-step scene ----------
-     Driven continuously: scroll position is smoothed, then every step cross-fades and
-     drifts based on its distance from the current position, so nothing snaps. The
-     progress bar fills as you go and each segment can be clicked to jump to a step. */
-  function clamp01(v){ return Math.max(0,Math.min(1,v)); }
-  var sp=0, sceneRaf=0, lastT=0, lastIdx=-1;
-  function scenePos(){
-    var r=scene.getBoundingClientRect(), total=r.height-window.innerHeight;
-    return total>0 ? clamp01(-r.top/total) : 0;
-  }
-  function sceneFrame(t){
-    sceneRaf=0;
-    var dt=lastT?Math.min(64,t-lastT):16; lastT=t;
-    var p=scenePos();
-    sp+=(p-sp)*(1-Math.exp(-dt/120));
-    var n=steps.length, x=sp*n;                           /* 0..n, step i is centred at i+0.5 */
-    steps.forEach(function(s,i){
-      var d=x-(i+.5);
-      if(i===0 && d<0) d=0;                               /* first step is fully shown at the very start */
-      if(i===n-1 && d>0) d=0;                             /* last step stays until the scene ends */
-      var o=clamp01(1-(Math.abs(d)-.2)/.22);              /* solid in the middle, fully gone before the next one arrives */
-      s.style.opacity=o.toFixed(3);
-      s.style.transform='translate3d(0,'+(-d*80).toFixed(1)+'px,0)';
-      s.style.pointerEvents=o>.6?'auto':'none';
+  /* ---------- four-step slider ----------
+     A normal block in the page (it never pins or captures the scroll). Move between
+     steps with the arrows, the dots, the keyboard (left/right) or a swipe. The pump's
+     screen changes with the step. */
+  var dots=[].slice.call(document.querySelectorAll('.sn-dots button'));
+  var arrows=[].slice.call(document.querySelectorAll('.sn-arrow'));
+  var col=document.querySelector('.scene__col');
+  var idx=0;
+  function show(i,fromUser){
+    i=Math.max(0,Math.min(steps.length-1,i));
+    if(i===idx && last!==-1) return;
+    idx=i; last=i;
+    steps.forEach(function(s,k){
+      s.classList.toggle('on',k===i);
+      s.classList.toggle('before',k<i);
+      s.setAttribute('aria-hidden',k===i?'false':'true');
     });
-    rail.forEach(function(r,i){ r.style.setProperty('--f',clamp01(x-i).toFixed(3)); });
-    var idx=Math.min(n-1,Math.max(0,Math.floor(x)));
-    if(idx!==lastIdx){
-      lastIdx=idx;
-      steps.forEach(function(s,i){ s.classList.toggle('on',i===idx); });
-      if(sceneMount) setLcd(sceneMount,keys[idx]);
+    dots.forEach(function(d,k){ if(k===i) d.setAttribute('aria-current','true'); else d.removeAttribute('aria-current'); });
+    arrows.forEach(function(a){ var dir=+a.getAttribute('data-dir'); a.disabled=(i+dir<0||i+dir>=steps.length); });
+    if(sceneMount) setLcd(sceneMount,keys[i]);
+  }
+  if(scene && !reduce && steps.length){
+    arrows.forEach(function(a){ a.addEventListener('click',function(){ show(idx+(+a.getAttribute('data-dir')),true); }); });
+    dots.forEach(function(d,k){ d.addEventListener('click',function(){ show(k,true); }); });
+    scene.addEventListener('keydown',function(e){
+      if(e.key==='ArrowRight'){ show(idx+1,true); } else if(e.key==='ArrowLeft'){ show(idx-1,true); }
+    });
+    /* swipe: horizontal drags change the step, vertical drags still scroll the page */
+    var x0=null,y0=0;
+    if(col){
+      col.addEventListener('pointerdown',function(e){ x0=e.clientX; y0=e.clientY; },{passive:true});
+      col.addEventListener('pointerup',function(e){
+        if(x0===null) return;
+        var dx=e.clientX-x0, dy=e.clientY-y0; x0=null;
+        if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4){ show(idx+(dx<0?1:-1),true); }
+      },{passive:true});
+      col.addEventListener('pointercancel',function(){ x0=null; });
     }
-    if(Math.abs(p-sp)>.0004) sceneRaf=requestAnimationFrame(sceneFrame);
-  }
-  function sceneReq(){ if(!sceneRaf){ lastT=0; sceneRaf=requestAnimationFrame(sceneFrame); } }
-  if(scene && !reduce){
-    scene.classList.add('live');
-    sp=scenePos();
-    window.addEventListener('scroll',sceneReq,{passive:true}); window.addEventListener('resize',sceneReq);
-    rail.forEach(function(seg,i){
-      seg.setAttribute('role','button'); seg.setAttribute('aria-label','Go to step '+(i+1)); seg.tabIndex=0;
-      function go(){
-        var r=scene.getBoundingClientRect(), total=r.height-window.innerHeight;
-        window.scrollTo({top:window.scrollY+r.top+((i+.5)/steps.length)*total,behavior:'smooth'});
-      }
-      seg.addEventListener('click',go);
-      seg.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
-    });
-    sceneFrame(performance.now());
+    show(0);
   }
   if(scene && reduce){ steps.forEach(function(s){s.classList.add('on');}); }
 

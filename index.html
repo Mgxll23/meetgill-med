@@ -9,8 +9,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=13">
-<link rel="stylesheet" href="hero-v2/hero.css?v=13">
+<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="hero-v2/hero.css?v=15">
 </head>
 <body>
 <div class="announce">Free to use while we are in preview. <a href="pricing.html">See what's planned</a></div>
@@ -66,7 +66,6 @@
     </div>
     <div class="h2-stage" aria-hidden="true">
       <div class="h2-rot" id="rot"><div class="h2-pump" id="pump"></div></div>
-      <div class="h2-cap" id="cap"><b></b><span></span></div>
     </div>
     <div class="h2-hint" id="hint"><i></i>Scroll to open the pump</div>
   </div>
@@ -78,7 +77,9 @@
 </div>
 
 <section class="scene" id="how" aria-label="What the pump can do">
+  <div class="scene__head"><span class="over">How it works</span></div>
   <div class="scene__pin">
+    <div class="scene__col">
     <div class="scene__text">
       <article class="step on">
         <span class="over">IV lab · return demo</span>
@@ -109,8 +110,13 @@
         <div class="lcd-inline">Value ABOVE upper soft limit<br>Soft: 2 - 10 mg/h<br>Override?</div>
       </article>
     </div>
+    <div class="scene__nav" role="group" aria-label="Choose a step">
+      <button type="button" class="sn-arrow" data-dir="-1" aria-label="Previous step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11.5 6.5L6 12l5.5 5.5"/></svg></button>
+      <div class="sn-dots"><button type="button" aria-label="Step 1"></button><button type="button" aria-label="Step 2"></button><button type="button" aria-label="Step 3"></button><button type="button" aria-label="Step 4"></button></div>
+      <button type="button" class="sn-arrow" data-dir="1" aria-label="Next step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6.5L18 12l-5.5 5.5"/></svg></button>
+    </div>
+    </div>
     <div class="scene__pump"><div data-pump="prime" data-size="lg"></div></div>
-    <div class="scene__rail" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
   </div>
 </section>
 
@@ -206,8 +212,10 @@
 
 
 
+
+
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=13"></script>
-<script src="hero-v2/hero.js?v=13"></script>
+<script src="app.js?v=15"></script>
+<script src="hero-v2/hero.js?v=15"></script>
 </body>
 </html>
