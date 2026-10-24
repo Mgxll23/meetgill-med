@@ -42,7 +42,10 @@
     '</div></div></div>';
   }
   function arrowSvg(k){return '<svg viewBox="0 0 24 24"><path d="'+AR[k]+'"/></svg>';}
-  function fit(pf){ var s=pf.firstChild; if(!s) return; var k=pf.clientWidth/900; s.style.transform='scale('+k+')'; pf.style.height=(s.offsetHeight*k)+'px'; }
+  function fit(pf){ var s=pf.firstChild; if(!s) return; var w=900;
+    if(pf.clientWidth<520){ /* phone: crop to the screen side so the text stays readable */
+      var P=s.firstChild,F=P.querySelector('.p9-face'),L=P.querySelector('.p9-left'); w=F.offsetLeft+L.offsetLeft+L.offsetWidth+14; pf.classList.add('crop'); } else pf.classList.remove('crop');
+    var k=pf.clientWidth/w; s.style.transform='scale('+k+')'; pf.style.height=(s.offsetHeight*k)+'px'; }
   document.querySelectorAll('[data-pump]').forEach(function(m){
     m.classList.add('pf'); m.innerHTML=pumpHTML(m.getAttribute('data-pump')); fit(m);
     if(window.ResizeObserver) new ResizeObserver(function(){fit(m);}).observe(m); else window.addEventListener('resize',function(){fit(m);});
@@ -78,7 +81,7 @@
   function frame(){
     ticking=false;
     var vh=window.innerHeight;
-    if(hp && !reduce){ var y=Math.min(window.scrollY,vh); hp.style.transform='translate3d(0,'+(y*-0.08)+'px,0)'; }
+    if(hp && !reduce && window.innerWidth>900){ var y=Math.min(window.scrollY,vh); hp.style.transform='translate3d(0,'+(y*-0.08)+'px,0)'; }
     if(scene && !reduce){
       var r=scene.getBoundingClientRect(), total=r.height-vh;
       var p=Math.max(0,Math.min(.999,-r.top/total)), idx=Math.floor(p*steps.length);
