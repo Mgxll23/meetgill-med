@@ -1,12 +1,11 @@
 /* Light / dark theme for MeetGill Med.
    Loaded in <head> so the saved choice is applied before the page paints (no flash).
-   Choice is remembered in localStorage ('mgm_theme'); with no saved choice it follows the device setting.
+   Choice is remembered in localStorage ('mgm_theme'); with no saved choice it opens in light mode.
    The pump simulator (pump/index.html, in an iframe) loads this too and follows the same choice. */
 (function(){
   var KEY='mgm_theme', root=document.documentElement;
   function saved(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
-  function system(){ return (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
-  function current(){ return saved() || system(); }
+  function current(){ return saved() || 'light'; }          /* light is the default; dark only when the visitor turns it on */
   function apply(t){
     root.setAttribute('data-theme',t);
     var b=document.querySelectorAll('.theme-btn');
