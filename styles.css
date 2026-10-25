@@ -482,3 +482,37 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
   .pump-back svg{width:20px;height:20px}
   .pump-frame{top:0;left:env(safe-area-inset-left);right:env(safe-area-inset-right);width:calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));height:100vh;height:100dvh}
 }
+
+/* ================= theme button + dark mode =================
+   theme.js sets data-theme="dark" | "light" on <html>. Dark mode swaps the colour tokens and the few hard-coded light surfaces. */
+.theme-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:transparent;color:inherit;display:inline-grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;transition:background .25s var(--ease),transform .25s var(--ease),border-color .25s var(--ease)}
+.theme-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;grid-area:1/1;transition:opacity .25s var(--ease),transform .4s var(--ease)}
+.theme-btn .ti-sun{opacity:0;transform:rotate(-60deg) scale(.6)}
+html[data-theme=dark] .theme-btn .ti-moon{opacity:0;transform:rotate(60deg) scale(.6)}
+html[data-theme=dark] .theme-btn .ti-sun{opacity:1;transform:none}
+@media (hover:hover){.theme-btn:hover{background:rgba(91,77,224,.12);border-color:var(--violet)}}
+.theme-btn:active{transform:scale(.94)}
+.nav-cta .theme-btn{margin-left:2px}
+html{color-scheme:light}
+html[data-theme=dark]{color-scheme:dark;
+  --paper:#0A1020; --card:#121C36; --line:#27345A; --text:#E8ECF8; --muted:#A5B0CC; --violet:#7466F0; --violet-soft:#241F52;
+  --ink:#16233F; --ink-2:#0E1830}
+html[data-theme=dark] .accent,html[data-theme=dark] .over{color:#9C90FF}
+html[data-theme=dark] .nav{background:rgba(10,16,32,.82)}
+html[data-theme=dark] .btn:hover{color:var(--ink)}
+html[data-theme=dark] .dark .btn:hover{color:var(--ink)}
+html[data-theme=dark] .field input,html[data-theme=dark] .seg label,html[data-theme=dark] .cform .field textarea,html[data-theme=dark] .cform .field select,
+html[data-theme=dark] .pills span,html[data-theme=dark] .field select,html[data-theme=dark] .field textarea{background:var(--card);color:var(--text)}
+html[data-theme=dark] .sub,html[data-theme=dark] .rcard{background:var(--card);border-color:var(--line)}
+html[data-theme=dark] .rcard{box-shadow:0 8px 24px rgba(0,0,0,.35)}
+html[data-theme=dark] .rimp,html[data-theme=dark] .wall-empty{color:var(--muted)}
+html[data-theme=dark] .stars svg{fill:transparent}
+html[data-theme=dark] .theme-btn--fs{color:#CFC8FF}
+/* phone full-screen pump bar: theme button sits at the right */
+.theme-btn--fs{display:none}
+@media (max-width:820px),(max-height:520px) and (pointer:coarse){
+  .pump-fsbar .theme-btn--fs{display:inline-grid;position:absolute;right:calc(env(safe-area-inset-right) + 10px);top:calc(env(safe-area-inset-top) + 3px);width:42px;height:42px;border-color:rgba(167,156,255,.3);color:#CFC8FF}
+}
+@media (max-height:520px) and (pointer:coarse){
+  .pump-fsbar .theme-btn--fs{top:max(6px,env(safe-area-inset-top));width:36px;height:36px;background:rgba(16,26,51,.78)}
+}

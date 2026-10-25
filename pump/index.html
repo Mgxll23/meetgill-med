@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script src="../theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -214,6 +215,33 @@ body.wide #panelClose{display:none}
 .wrong{margin:0;padding-left:20px;font-size:14px;color:#ffb3aa}
 .walk{font-size:14px;line-height:1.5;background:#0E1730;padding:10px;border-radius:8px}
 @media (max-height:640px){ .pill{height:30px} }
+
+/* ---- light theme (follows the website's choice via theme.js); the pump device itself is unchanged ---- */
+html[data-theme=light],html[data-theme=light] body{background:#E3E7F2;color:#111827}
+html[data-theme=light] #panel{background:#FFFFFF;border-left-color:#D3D9EA}
+html[data-theme=light] #panel .ph{background:#FFFFFF}
+html[data-theme=light] #panel .ph button{color:#5b6480}
+html[data-theme=light] #panel section{border-top-color:#E1E5F2}
+html[data-theme=light] #panel h3,html[data-theme=light] #report h3,html[data-theme=light] .lab{color:#5b6480}
+html[data-theme=light] #panel select{background:#F3F5FB;color:#111827;border-color:#C5CDE3}
+html[data-theme=light] #panel .btns button,html[data-theme=light] #reportClose{background:#EEF0FA;color:#111827;border-color:#C5CDE3}
+html[data-theme=light] #panel .btns button.on,html[data-theme=light] #panel .btns button#acBtn.on,html[data-theme=light] #panel #scnStart{background:#5B4DE0;border-color:#5B4DE0;color:#fff}
+html[data-theme=light] #panel .btns button.warnbtn{border-color:#d9a09a;color:#a8321f}
+html[data-theme=light] .brief,html[data-theme=light] .walk{background:#EEF0FA;color:#111827}
+html[data-theme=light] .small{color:#5b6480}
+html[data-theme=light] .prog{color:#1b7a3d}
+html[data-theme=light] .hint{color:#8a5a00}
+html[data-theme=light] #report{background:rgba(20,30,55,.55)}
+html[data-theme=light] #report .card{background:#FFFFFF;color:#111827}
+html[data-theme=light] .score.good,html[data-theme=light] .tally .ok{color:#15803d}
+html[data-theme=light] .score.mid,html[data-theme=light] .tally .miss{color:#a16207}
+html[data-theme=light] .score.bad,html[data-theme=light] .tally .bad{color:#b91c1c}
+html[data-theme=light] .steps li.ok{color:#15803d}
+html[data-theme=light] .steps li.miss{color:#b91c1c}
+html[data-theme=light] .wrong{color:#b91c1c}
+html[data-theme=light] #doorTxt{color:#4a5470}
+html[data-theme=light] .chip{background:#FFFFFF;color:#1d2540;border-color:#B8C1DB}
+html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
 </style></head><body>
 <div id="stage">
  <div id="pumpWrap"><div id="rig" class="land">
