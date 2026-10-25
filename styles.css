@@ -444,3 +444,32 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
   .scene__text{display:block;overflow:visible}
   .scene .step{opacity:1;transform:none;margin-bottom:56px;pointer-events:auto}
 }
+
+
+/* ---- reviews wall + consent checkbox ---- */
+.wall-sec{padding:0 0 clamp(40px,6vw,80px)}
+.wall-h{font-size:clamp(28px,3.6vw,44px);margin:0 0 10px}
+.wall-empty{color:var(--muted,#5b6480);padding:28px;border:1px dashed #B3AAF0;border-radius:16px;text-align:center;margin:0}
+.wall-avg{font-weight:700;margin:0 0 18px}
+.wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:16px}
+.rcard{background:#fff;border:1px solid #E1DEF7;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(22,35,63,.06)}
+.rstars{color:var(--violet);font-size:20px;letter-spacing:2px;margin-bottom:8px}
+.rtext{margin:0 0 8px;line-height:1.5}
+.rimp{color:#5b6480;font-size:14px}
+.rwho{margin:12px 0 0;font-weight:700;font-size:14px}
+.consent{display:flex;gap:12px;align-items:flex-start;margin:0 0 22px;font-size:14px;line-height:1.45;cursor:pointer}
+.consent input{width:22px;height:22px;margin:0;flex:none;accent-color:var(--violet)}
+
+
+/* ---- phone: the pump page is a full-screen app with a Back bar (no site header, footer or scrolling page) ---- */
+.pump-fsbar{display:none}
+@media (max-width:820px){
+  body:has(.pump-frame){overflow:hidden;background:#0B1226}
+  body:has(.pump-frame) .nav,body:has(.pump-frame) footer,body:has(.pump-frame) .pump-bar,body:has(.pump-frame) .pump-note,body:has(.pump-frame) .float-fb{display:none!important}
+  .pump-fsbar{display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:50;height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0 8px;background:#101a33;border-bottom:1px solid rgba(167,156,255,.18)}
+  .pump-back{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 12px 0 6px;border-radius:12px;color:#CFC8FF;text-decoration:none;font:600 16px var(--f-body);-webkit-tap-highlight-color:transparent;transition:background .2s var(--ease),transform .2s var(--ease)}
+  .pump-back svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .pump-back:active{background:rgba(167,156,255,.16);transform:scale(.97)}
+  .pump-fsbar__t{position:absolute;left:0;right:0;text-align:center;pointer-events:none;color:#fff;font:600 15px var(--f-body)}
+  .pump-frame{position:fixed;left:0;right:0;bottom:0;top:calc(48px + env(safe-area-inset-top));width:100%;height:calc(100vh - 48px - env(safe-area-inset-top));height:calc(100dvh - 48px - env(safe-area-inset-top));min-height:0}
+}
