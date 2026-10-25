@@ -474,9 +474,11 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
   .pump-frame{position:fixed;left:0;right:0;bottom:0;top:calc(48px + env(safe-area-inset-top));width:100%;height:calc(100vh - 48px - env(safe-area-inset-top));height:calc(100dvh - 48px - env(safe-area-inset-top));min-height:0}
 }
 
-/* phone held sideways: slimmer bar so the pump gets the height */
+/* phone held sideways: no bar at all, just a small Back pill floating in the empty margin left of the pump, so the pump gets the full height */
 @media (max-height:520px) and (pointer:coarse){
-  .pump-fsbar{height:calc(40px + env(safe-area-inset-top));padding-left:max(8px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
-  .pump-back{min-height:40px}
-  .pump-frame{top:calc(40px + env(safe-area-inset-top));height:calc(100vh - 40px - env(safe-area-inset-top));height:calc(100dvh - 40px - env(safe-area-inset-top))}
+  .pump-fsbar{background:none;border:0;height:0;padding:0;right:auto}
+  .pump-fsbar__t{display:none}
+  .pump-back{position:absolute;top:max(6px,env(safe-area-inset-top));left:calc(env(safe-area-inset-left) + 4px);min-height:36px;padding:0 10px 0 4px;font-size:14px;background:rgba(16,26,51,.78);border:1px solid rgba(167,156,255,.25)}
+  .pump-back svg{width:20px;height:20px}
+  .pump-frame{top:0;left:env(safe-area-inset-left);right:env(safe-area-inset-right);width:calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));height:100vh;height:100dvh}
 }
