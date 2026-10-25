@@ -516,3 +516,22 @@ html[data-theme=dark] .theme-btn--fs{color:#CFC8FF}
 @media (max-height:520px) and (pointer:coarse){
   .pump-fsbar .theme-btn--fs{top:max(6px,env(safe-area-inset-top));width:36px;height:36px;background:rgba(16,26,51,.78)}
 }
+
+
+/* ---- reviews: summary, hint, home-page floating row ---- */
+.field .hint{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+.wall-sum{margin:0 0 18px}.wall-sum .wall-avg{font-size:clamp(20px,2.2vw,26px);margin:0 0 10px}
+.wall-bits{display:flex;flex-wrap:wrap;gap:8px}
+.wall-bit{font:600 13px/1 var(--f-body);padding:8px 12px;border-radius:99px;background:var(--violet-soft);color:var(--text)}
+.rvs{padding-left:0;padding-right:0;overflow:hidden}
+.rvs[hidden]{display:none}
+.rvs-viewport{overflow:hidden;margin:8px 0 34px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.rvs-track{display:flex;gap:16px;width:max-content;padding:10px 0 22px}
+.rvs-track:not(.rvs-marquee){width:auto;flex-wrap:wrap;justify-content:center;padding:10px 24px 22px}
+.rvs-track .rcard{width:min(340px,82vw);flex:none}
+.rvs-track .rtext{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.rvs-marquee{animation:rvs-scroll var(--dur,40s) linear infinite;will-change:transform}
+.rvs:hover .rvs-marquee,.rvs:focus-within .rvs-marquee{animation-play-state:paused}
+@keyframes rvs-scroll{to{transform:translateX(calc(-50% - 8px))}}
+.rvs-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+@media (prefers-reduced-motion:reduce){.rvs-marquee{animation:none}.rvs-viewport{overflow-x:auto}}

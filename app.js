@@ -145,3 +145,47 @@
   document.addEventListener('click',function(){ closeAll(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeAll(); } });
 })();
+
+
+/* ---------- student reviews ----------
+   MGM_REVIEWS_API is the review service address (the Cloudflare Worker in tools/reviews-worker), no trailing slash.
+   While it is empty the site reads reviews.json instead and the form only saves on the visitor's own device. */
+window.MGM_REVIEWS_API='';
+window.mgmLoadReviews=function(ok,fail){
+  var api=window.MGM_REVIEWS_API, url=api?api+'/reviews':'reviews.json';
+  fetch(url,{cache:'no-cache'}).then(function(r){ if(!r.ok){ throw new Error('x'); } return r.json(); }).then(function(d){
+    var list=Array.isArray(d)?d:(d.reviews||[]), st=d.stats;
+    if(!st){ var n=0,t=0; list.forEach(function(x){ if(+x.rating){ n++; t+=+x.rating; } }); st={overall:n?Math.round(t/n*10)/10:null,count:list.length}; }
+    ok(list,st);
+  }).catch(function(){ if(fail) fail(); });
+};
+/* one review card; text goes in as plain text */
+window.mgmReviewCard=function(x){
+  function el(t,c,tx){ var e=document.createElement(t); if(c) e.className=c; if(tx!=null) e.textContent=tx; return e; }
+  var c=el('article','rcard'), n=Math.max(0,Math.min(5,+x.rating||0));
+  var st=el('div','rstars','★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n));
+  st.setAttribute('aria-label',n+' out of 5'); c.appendChild(st);
+  if(x.liked) c.appendChild(el('p','rtext',x.liked));
+  if(x.improve) c.appendChild(el('p','rtext rimp','To improve: '+x.improve));
+  c.appendChild(el('p','rwho',x.name+(x.role?', '+x.role:'')));
+  return c;
+};
+/* home page: floating row of student reviews (hidden until there is at least one review with text) */
+(function(){
+  var sec=document.getElementById('student-reviews'); if(!sec) return;
+  var track=document.getElementById('rvs-track'), sum=document.getElementById('rvs-sum');
+  window.mgmLoadReviews(function(list,stats){
+    list=list.filter(function(x){ return x.liked||x.improve; });
+    if(!list.length) return;
+    list.forEach(function(x){ track.appendChild(window.mgmReviewCard(x)); });
+    if(stats&&stats.overall) sum.textContent=stats.overall+' out of 5 from '+(stats.count||list.length)+(list.length===1?' student review':' student reviews');
+    var reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(list.length>=4 && !reduce){
+      var kids=[].slice.call(track.children);
+      kids.forEach(function(k){ var cl=k.cloneNode(true); cl.setAttribute('aria-hidden','true'); track.appendChild(cl); });
+      track.style.setProperty('--dur',Math.max(30,list.length*8)+'s');
+      track.classList.add('rvs-marquee');
+    }
+    sec.hidden=false;
+  });
+})();
