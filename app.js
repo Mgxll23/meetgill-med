@@ -150,7 +150,7 @@
 /* ---------- student reviews ----------
    MGM_REVIEWS_API is the review service address (the Cloudflare Worker in tools/reviews-worker), no trailing slash.
    While it is empty the site reads reviews.json instead and the form only saves on the visitor's own device. */
-window.MGM_REVIEWS_API='';
+window.MGM_REVIEWS_API='https://mgm-reviews.meetgillmed.workers.dev';
 window.mgmLoadReviews=function(ok,fail){
   var api=window.MGM_REVIEWS_API, url=api?api+'/reviews':'reviews.json';
   fetch(url,{cache:'no-cache'}).then(function(r){ if(!r.ok){ throw new Error('x'); } return r.json(); }).then(function(d){
