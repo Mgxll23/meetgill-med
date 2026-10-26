@@ -231,6 +231,16 @@ html[data-theme=light] .brief,html[data-theme=light] .walk{background:#EEF0FA;co
 html[data-theme=light] .small{color:#5b6480}
 html[data-theme=light] .prog{color:#1b7a3d}
 html[data-theme=light] .hint{color:#8a5a00}
+#myForm{margin-top:10px}
+#myForm .lab{margin-top:10px}
+#panel input[type=text],#panel input[type=number],#panel textarea{width:100%;box-sizing:border-box;background:#16213F;color:#e8eaed;border:1px solid #33457A;border-radius:8px;padding:10px 8px;font:16px system-ui,sans-serif}
+#panel input[type=text],#panel input[type=number]{height:44px;padding:0 8px}
+#panel textarea{resize:vertical}
+.ferr{margin:4px 0 0;font-size:13px;line-height:1.35;color:#ff9d93}
+#panel input[aria-invalid=true],#panel select[aria-invalid=true]{border-color:#ff9d93}
+html[data-theme=light] #panel input[type=text],html[data-theme=light] #panel input[type=number],html[data-theme=light] #panel textarea{background:#F3F5FB;color:#111827;border-color:#C5CDE3}
+html[data-theme=light] .ferr{color:#a8321f}
+html[data-theme=light] #panel input[aria-invalid=true],html[data-theme=light] #panel select[aria-invalid=true]{border-color:#a8321f}
 html[data-theme=light] #report{background:rgba(20,30,55,.55)}
 html[data-theme=light] #report .card{background:#FFFFFF;color:#111827}
 html[data-theme=light] .score.good,html[data-theme=light] .tally .ok{color:#15803d}
@@ -307,6 +317,32 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
     <div id="scnProg" class="prog"></div>
     <div class="btns"><button id="scnHint" type="button" disabled>Hint</button><button id="scnFinish" type="button" disabled>Finish &amp; score</button></div>
     <p id="scnHintTxt" class="hint"></p>
+  </section>
+  <section id="mySec">
+    <h3>Make your own scenario</h3>
+    <p class="small">Not using the ready-made ones? Build your own order to practise. It is saved on this device only.</p>
+    <div class="btns"><button id="myOpen" type="button">Create a scenario</button><button id="myDel" type="button" class="warnbtn" hidden>Delete selected</button></div>
+    <form id="myForm" novalidate hidden>
+      <div class="lab">Name (optional)</div><input id="myTitle" type="text" maxlength="60" placeholder="For example: Heparin for Mr. Lee">
+      <div class="lab">What kind of order?</div>
+      <select id="myKind"><option value="ivf">IV fluid (primary)</option><option value="drug">Drug with a dose rate</option></select>
+      <div id="myIvf">
+        <div class="lab">Rate (ml/h)</div><input id="myRate" type="number" inputmode="decimal" step="any" min="0">
+        <div class="lab">VTBI (ml)</div><input id="myVtbi" type="number" inputmode="decimal" step="any" min="0">
+      </div>
+      <div id="myDrug" hidden>
+        <div class="lab">Care unit</div><select id="myUnit"></select>
+        <div class="lab">Patient profile</div><select id="myProf"></select>
+        <div class="lab">Drug</div><select id="myDrugSel"></select>
+        <div id="myConcRow" hidden><div class="lab">Concentration</div><select id="myConc"></select></div>
+        <div id="myWtRow" hidden><div class="lab">Patient weight (kg)</div><input id="myWt" type="number" inputmode="decimal" step="any" min="0"></div>
+        <div class="lab" id="myDoseLab">Dose rate</div><input id="myDose" type="number" inputmode="decimal" step="any" min="0">
+        <div class="lab">VTBI in ml (optional)</div><input id="myDvtbi" type="number" inputmode="decimal" step="any" min="0">
+      </div>
+      <div class="lab">Situation or notes (optional)</div><textarea id="myNote" rows="2" maxlength="300" placeholder="Shown with the scenario"></textarea>
+      <div class="btns"><button id="mySave" type="submit">Save scenario</button><button id="myCancel" type="button">Cancel</button></div>
+      <p id="myMsg" class="small"></p>
+    </form>
   </section>
   <section>
     <h3>Simulation</h3>
@@ -2259,22 +2295,67 @@ const SCENARIOS=[
   walk:'On the run screen press ◀ > change 5.00 to 8.00 (▲ x3 on the ones digit) > OK within 20 s or VALUE NOT CONFIRMED reminder sounds.'}
 ];
 
+/* ---------- your own scenarios: built from the same steps as the ready-made ones, saved on this device ---------- */
+const CUSTOM_KEY='mgm_custom_scn';
+function loadCustom(){ try{ const a=JSON.parse(localStorage.getItem(CUSTOM_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function saveCustom(a){ try{ localStorage.setItem(CUSTOM_KEY,JSON.stringify(a)); }catch(e){} }
+function fmt(n){ return String(Math.round(n*1000)/1000); }
+function buildCustom(c){
+  const note=c.note?c.note+' ':'';
+  if(c.kind==='ivf'){
+    const steps=[
+     {t:'OK to program, select care unit Med / Surg',ev:'careunit',where:{name:'Med-Surg'}},
+     {t:'Select IV fluid from the list',ev:'ivfluid',where:{ctx:'PRIM'}},
+     {t:'Enter Rate '+fmt(c.rate)+' ml/h',ev:'param',where:{field:'rate',val:c.rate,ctx:'PRIM'}},
+     {t:'Enter VTBI '+fmt(c.vtbi)+' ml',ev:'param',where:{field:'vtbi',val:c.vtbi,ctx:'PRIM'}},
+     {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}}];
+    return {ret:true,mine:true,id:c.id,title:c.title,
+      brief:note+'The line is loaded and primed. Program a primary IV fluid for a Med / Surg patient: rate '+fmt(c.rate)+' ml/h, volume to be infused '+fmt(c.vtbi)+' ml, then start.',
+      setup(){ fastOn(); }, steps,
+      walk:'OK at the home screen > Med / Surg (OK) > IV fluid, OK > Rate '+fmt(c.rate)+', OK > VTBI '+fmt(c.vtbi)+', OK > Start/Stop.'};
+  }
+  const d=DRUGS.find(x=>x.id===c.drug); if(!d) throw new Error('drug');
+  const idx=c.conc||0, perKg=/\/kg/.test(d.du);
+  const steps=[
+   {t:'Select care unit '+c.unit,ev:'careunit',where:{name:c.unit}},
+   {t:'Select profile '+c.profile,ev:'profile',where:{name:c.profile}},
+   {t:'Select drug '+d.s,ev:'drug',where:{id:d.id,ctx:'PRIM'}}];
+  if(d.c&&d.c.length>1) steps.push({t:'Select concentration '+concText(d.c[idx]),ev:'conc',where:{idx}});
+  if(perKg) steps.push({t:'Enter patient weight '+fmt(c.weight)+' kg',ev:'weight',where:{kg:c.weight}});
+  if(c.soft) steps.push({t:'Override the soft-limit prompt (YES) after verifying the order',ev:'override',where:{yes:true,field:'doserate'}});
+  steps.push({t:'Enter doserate '+fmt(c.dose)+' '+d.du,ev:'param',where:{field:'doserate',val:c.dose}});
+  if(c.vtbi>0) steps.push({t:'Enter VTBI '+fmt(c.vtbi)+' mL',ev:'param',where:{field:'vtbi',val:c.vtbi}});
+  steps.push({t:'Start',ev:'start',where:{ctx:'PRIM'}});
+  return {mine:true,id:c.id,title:c.title,
+    brief:note+'Program '+d.l+(d.c&&d.c.length?' '+concText(d.c[idx]):'')+' at '+fmt(c.dose)+' '+d.du+(c.vtbi>0?', VTBI '+fmt(c.vtbi)+' mL':'')+'. Care unit '+c.unit+', profile '+c.profile+(perKg?', weight '+fmt(c.weight)+' kg':'')+'. Then start the infusion. (Pump is on, IV line loaded.)',
+    setup(){ fastOn(); }, steps,
+    walk:steps.map(x=>x.t).join(' > ')+'.'};
+}
+loadCustom().forEach(c=>{ try{ SCENARIOS.push(buildCustom(c)); }catch(e){} });
+
 var exam={
   sc:null, steps:[], wrong:[], on:false,
   init(){
     const sel=$('#scnSel');
-    const g1=document.createElement('optgroup'); g1.label='RETURN DEMO - IV fluids (Med / Surg)';
-    const g2=document.createElement('optgroup'); g2.label='Extra practice - full drug library';
-    SCENARIOS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=(i+1)+'. '+s.title; (s.ret?g1:g2).appendChild(o); });
-    sel.appendChild(g1); sel.appendChild(g2); sel.value='0';
+    this.fillSel();
     const fl=$('#fullLib'); if(fl) fl.addEventListener('change',()=>{ S.fullLib=fl.checked; });
-    sel.addEventListener('change',()=>this.preview());
+    sel.addEventListener('change',()=>{ this.preview(); if(window.myScnSync) window.myScnSync(); });
     $('#scnStart').addEventListener('click',()=>this.start(+sel.value));
     $('#scnHint').addEventListener('click',()=>this.hint());
     $('#scnFinish').addEventListener('click',()=>this.finish());
     $('#scnFree').addEventListener('click',()=>{ this.stop(); hardReset(); $('#scnBrief').textContent='Free practice: the pump behaves like the real device. Hold ON/OFF 3 s to start.'; });
     $('#reportClose').addEventListener('click',()=>$('#report').classList.remove('show'));
     this.preview();
+  },
+  fillSel(keep){
+    const sel=$('#scnSel'); sel.textContent='';
+    const g1=document.createElement('optgroup'); g1.label='RETURN DEMO - IV fluids (Med / Surg)';
+    const g2=document.createElement('optgroup'); g2.label='Extra practice - full drug library';
+    const g3=document.createElement('optgroup'); g3.label='My scenarios';
+    SCENARIOS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=(i+1)+'. '+s.title; (s.mine?g3:s.ret?g1:g2).appendChild(o); });
+    sel.appendChild(g1); sel.appendChild(g2); if(g3.children.length) sel.appendChild(g3);
+    sel.value=keep!=null?String(keep):'0';
+    if(window.myScnSync) window.myScnSync();
   },
   preview(){
     if(this.on) return;
@@ -2347,4 +2428,104 @@ var exam={
     this.on=false; $('#scnFinish').disabled=true;
   }
 };
+/* ---------- "make your own scenario" form ---------- */
+(function(){
+  const form=$('#myForm'); if(!form) return;
+  const f=id=>document.getElementById(id);
+  const drugs=DRUGS.filter(d=>d.du&&!d.load&&d.m.join('')==='C'&&d.role!=='S').sort((a,b)=>a.s.localeCompare(b.s));
+  CARE_UNITS.forEach(u=>f('myUnit').add(new Option(u,u)));
+  PROFILES.forEach(x=>f('myProf').add(new Option(x,x)));
+  drugs.forEach(d=>f('myDrugSel').add(new Option(d.s+' ('+d.du+')',d.id)));
+  f('myUnit').value='ICU';
+  const curDrug=()=>drugs.find(d=>d.id===f('myDrugSel').value);
+  const touched=new Set(), shown=new Set();
+  function syncDrug(){
+    const d=curDrug(), c=f('myConc'); c.textContent='';
+    (d.c||[]).forEach((x,i)=>c.add(new Option(concText(x),i)));
+    f('myConcRow').hidden=!(d.c&&d.c.length>1);
+    f('myWtRow').hidden=!/\/kg/.test(d.du);
+    f('myDoseLab').textContent='Dose rate ('+d.du+')';
+  }
+  function syncKind(){ const ivf=f('myKind').value==='ivf'; f('myIvf').hidden=!ivf; f('myDrug').hidden=ivf; if(!ivf) syncDrug(); }
+  function mark(id,msg){
+    const old=document.getElementById('e-'+id); if(old) old.remove();
+    const el=f(id); el.removeAttribute('aria-invalid');
+    if(!msg) return;
+    const p=document.createElement('p'); p.className='ferr'; p.id='e-'+id; p.setAttribute('role','alert'); p.textContent=msg;
+    el.insertAdjacentElement('afterend',p); el.setAttribute('aria-invalid','true');
+  }
+  const pos=id=>{ const v=f(id).value.trim(); return v===''?NaN:parseFloat(v); };
+  /* returns {errs:{fieldId:message}, cfg} */
+  function check(){
+    const errs={}, kind=f('myKind').value, title=f('myTitle').value.trim(), note=f('myNote').value.trim();
+    let cfg=null;
+    if(kind==='ivf'){
+      const rate=pos('myRate'), vtbi=pos('myVtbi');
+      if(!(rate>0)) errs.myRate='Enter a rate above 0 ml/h.'; else if(rate>999) errs.myRate='The pump accepts up to 999 ml/h.';
+      if(!(vtbi>0)) errs.myVtbi='Enter a volume above 0 ml.'; else if(vtbi>9999) errs.myVtbi='The pump accepts up to 9999 ml.';
+      if(!errs.myRate&&!errs.myVtbi&&vtbi/rate>99) errs.myVtbi='That would run for over 99 hours. Use a smaller volume or a higher rate.';
+      if(!Object.keys(errs).length) cfg={kind:'ivf',rate,vtbi,title:title||'IV fluid '+fmt(rate)+' ml/h, VTBI '+fmt(vtbi)+' ml',note};
+    } else {
+      const d=curDrug(), unit=f('myUnit').value, prof=f('myProf').value, perKg=/\/kg/.test(d.du);
+      if(d.u.indexOf(unit)<0) errs.myUnit=d.s+' is not in the drug library for '+unit+'. Try '+d.u.join(', ')+'.';
+      if(d.pr.indexOf(prof)<0) errs.myProf=d.s+' is not in the drug library for the '+prof+' profile. Try '+d.pr.join(', ')+'.';
+      let weight=0;
+      if(perKg){
+        weight=pos('myWt'); const w=WEIGHT_SOFT[prof];
+        if(!(weight>0)) errs.myWt='Enter the patient weight in kg.'; else if(weight<w[0]||weight>w[1]) errs.myWt='For the '+prof+' profile, use a weight from '+w[0]+' to '+w[1]+' kg.';
+      }
+      const dose=pos('myDose'); let soft=false;
+      if(!(dose>0)) errs.myDose='Enter a dose rate above 0 '+d.du+'.';
+      else if(!errs.myUnit&&!errs.myProf){
+        const l=lim({kind:'lib',drug:d,unit,profile:prof},'doserate');
+        if(l&&dose>l.hh+1e-9) errs.myDose='The pump will not accept more than '+fmt(l.hh)+' '+d.du+' for '+unit+' / '+prof+' (hard limit). Enter '+fmt(l.hh)+' or less.';
+        else if(l&&(dose<l.sl-1e-9||dose>l.sh+1e-9)) soft=true;
+      }
+      const raw=f('myDvtbi').value.trim(); let vtbi=0;
+      if(raw!==''){ vtbi=parseFloat(raw); if(!(vtbi>0)) errs.myDvtbi='Enter a volume above 0 ml, or leave it empty.'; else if(vtbi>9999) errs.myDvtbi='The pump accepts up to 9999 ml.'; }
+      if(!Object.keys(errs).length) cfg={kind:'drug',drug:d.id,unit,profile:prof,conc:+f('myConc').value||0,weight,dose,vtbi,soft,title:title||d.s+' '+fmt(dose)+' '+d.du,note};
+    }
+    return {errs,cfg};
+  }
+  const FIELDS=['myRate','myVtbi','myUnit','myProf','myWt','myDose','myDvtbi'];
+  function paint(all){
+    const r=check();
+    FIELDS.forEach(id=>mark(id,(all||touched.has(id))?(r.errs[id]||''):''));
+    return r;
+  }
+  form.addEventListener('focusout',e=>{ if(e.target.id){ touched.add(e.target.id); paint(false); } });
+  form.addEventListener('input',e=>{ if(e.target.id&&e.target.getAttribute('aria-invalid')) paint(false); });
+  form.addEventListener('change',e=>{
+    if(e.target.id==='myKind'){ syncKind(); touched.clear(); paint(false); }
+    if(e.target.id==='myDrugSel'){ syncDrug(); }
+    if(e.target.id){ touched.add(e.target.id); paint(false); }
+  });
+  f('myOpen').addEventListener('click',()=>{ form.hidden=!form.hidden; f('myMsg').textContent=''; if(!form.hidden){ syncKind(); f('myTitle').focus(); } });
+  f('myCancel').addEventListener('click',()=>{ form.hidden=true; form.reset(); touched.clear(); paint(false); f('myUnit').value='ICU'; });
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    FIELDS.forEach(id=>touched.add(id));
+    const r=paint(true);
+    if(!r.cfg){ const first=FIELDS.find(id=>r.errs[id]); if(first){ const el=f(first); el.scrollIntoView({block:'center',behavior:'smooth'}); el.focus({preventScroll:true}); } return; }
+    const all=loadCustom();
+    if(all.length>=30){ f('myMsg').textContent='You have 30 scenarios saved. Delete one to add another.'; return; }
+    const c=Object.assign({id:'my-'+Date.now()},r.cfg); all.push(c); saveCustom(all);
+    SCENARIOS.push(buildCustom(c));
+    exam.fillSel(SCENARIOS.length-1); exam.preview();
+    form.reset(); touched.clear(); paint(false); f('myUnit').value='ICU'; syncKind(); form.hidden=true;
+    document.getElementById('scnBrief').scrollIntoView({block:'nearest'});
+    f('myMsg').textContent='';
+    $('#scnHintTxt').textContent='Saved. It is selected in the list above: press Start scenario.';
+  });
+  window.myScnSync=()=>{ const s=SCENARIOS[+$('#scnSel').value]; f('myDel').hidden=!(s&&s.mine); };
+  f('myDel').addEventListener('click',()=>{
+    const i=+$('#scnSel').value, s=SCENARIOS[i];
+    if(!s||!s.mine) return;
+    if(exam.on){ $('#scnHintTxt').textContent='Finish or stop the running scenario before deleting.'; return; }
+    saveCustom(loadCustom().filter(c=>c.id!==s.id)); SCENARIOS.splice(i,1);
+    exam.fillSel(0); exam.preview();
+  });
+  syncKind();
+  window.myScnSync();
+})();
 </script></body></html>
