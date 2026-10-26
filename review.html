@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script src="theme.js?v=28"></script>
+<script src="theme.js?v=29"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reviews - MeetGill Med</title>
 <meta name="description" content="What students say about MeetGill Med, and how to leave a review.">
@@ -10,7 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=28">
+<link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
 <header class="nav">
@@ -59,7 +59,7 @@
       <div class="field"><label for="rc">What should we change or add?</label><textarea id="rc" name="improve" rows="4" maxlength="1200"></textarea></div>
       <div class="field"><label for="ru">Would you use this to prepare for your lab?</label>
         <select id="ru" name="would_use"><option value="">Choose one</option><option>Yes</option><option>Maybe</option><option>No</option></select></div>
-      <label class="consent"><input type="checkbox" name="public" value="yes"><span><b>Show my review on the website</b> (first name and last initial, program, rating and comments). Leave this unticked to send it as private feedback.</span></label>
+      <p class="hint">Reviews are shown on the website once checked, with your first name and last initial, program, rating and comments.</p>
       <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
       <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send my review</button>
       <p class="secure">Reviews are checked before they appear. Private feedback goes to the site owner only.</p>
@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded',function(){
     if(f.website.value){ return; }
     if(!name){ window.toast('Please add your name.'); f.name.focus(); return; }
     if(!val('overall')){ window.toast('Please choose an overall star rating.'); return; }
-    var pub=f.public.checked;
+    var pub=true;
     var p={name:name,role:f.role.value.trim(),overall:val('overall'),look:val('look'),ease:val('ease'),learn:val('learn'),
       liked:f.liked.value.trim(),improve:f.improve.value.trim(),would_use:f.would_use.value,public:pub?'yes':'no',website:''};
     function done(){
@@ -134,6 +134,6 @@ window.addEventListener('DOMContentLoaded',function(){
   </div>
 </footer>
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=28"></script>
+<script src="app.js?v=29"></script>
 </body>
 </html>
