@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script src="theme.js?v=30"></script>
+<script src="theme.js?v=31"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reviews - MeetGill Med</title>
 <meta name="description" content="What students say about MeetGill Med, and how to leave a review.">
@@ -10,7 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 <header class="nav">
@@ -51,9 +51,9 @@
     <h2 class="wall-h">Leave a review</h2>
     <p class="lead" style="margin-bottom:28px">It takes about a minute, and no account is needed.</p>
     <form id="rf" class="rform" novalidate>
-      <div class="field"><label for="rn">Your name</label><input id="rn" name="name" type="text" autocomplete="name" required><small class="hint">Only your first name and last initial are shown.</small></div>
+      <div class="field"><label for="rn">Your name</label><input id="rn" name="name" type="text" autocomplete="name" required data-msg="Please add your name."><small class="hint">Only your first name and last initial are shown.</small></div>
       <div class="field"><label for="rp">Your program (optional)</label><input id="rp" name="role" type="text" maxlength="80" placeholder="For example: RRC Polytech nursing, year 2"></div>
-      <fieldset class="stars-set"><legend>Overall, how would you rate it?</legend><div class="stars"><input type="radio" id="st5" name="overall" value="5"><label for="st5" title="5 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st4" name="overall" value="4"><label for="st4" title="4 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st3" name="overall" value="3"><label for="st3" title="3 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st2" name="overall" value="2"><label for="st2" title="2 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st1" name="overall" value="1"><label for="st1" title="1 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label></div></fieldset>
+      <fieldset class="stars-set" data-req="Please choose an overall star rating."><legend>Overall, how would you rate it?</legend><div class="stars"><input type="radio" id="st5" name="overall" value="5"><label for="st5" title="5 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st4" name="overall" value="4"><label for="st4" title="4 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st3" name="overall" value="3"><label for="st3" title="3 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st2" name="overall" value="2"><label for="st2" title="2 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label><input type="radio" id="st1" name="overall" value="1"><label for="st1" title="1 out of 5"><svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/></svg></label></div></fieldset>
       <fieldset class="scale"><legend>Look and feel</legend><div class="pills"><label><input type="radio" name="look" value="1"><span>1</span></label><label><input type="radio" name="look" value="2"><span>2</span></label><label><input type="radio" name="look" value="3"><span>3</span></label><label><input type="radio" name="look" value="4"><span>4</span></label><label><input type="radio" name="look" value="5"><span>5</span></label></div><div class="ends"><span>Poor</span><span>Great</span></div></fieldset><fieldset class="scale"><legend>Easy to use</legend><div class="pills"><label><input type="radio" name="ease" value="1"><span>1</span></label><label><input type="radio" name="ease" value="2"><span>2</span></label><label><input type="radio" name="ease" value="3"><span>3</span></label><label><input type="radio" name="ease" value="4"><span>4</span></label><label><input type="radio" name="ease" value="5"><span>5</span></label></div><div class="ends"><span>Poor</span><span>Great</span></div></fieldset><fieldset class="scale"><legend>Helps you learn the pump</legend><div class="pills"><label><input type="radio" name="learn" value="1"><span>1</span></label><label><input type="radio" name="learn" value="2"><span>2</span></label><label><input type="radio" name="learn" value="3"><span>3</span></label><label><input type="radio" name="learn" value="4"><span>4</span></label><label><input type="radio" name="learn" value="5"><span>5</span></label></div><div class="ends"><span>Poor</span><span>Great</span></div></fieldset>
       <div class="field"><label for="rl">What did you like?</label><textarea id="rl" name="liked" rows="4" maxlength="1200"></textarea></div>
       <div class="field"><label for="rc">What should we change or add?</label><textarea id="rc" name="improve" rows="4" maxlength="1200"></textarea></div>
@@ -62,6 +62,7 @@
       <p class="hint">Reviews are shown on the website once checked, with your first name and last initial, program, rating and comments.</p>
       <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
       <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send my review</button>
+      <p id="rerr" class="ferr form-msg" role="alert" hidden></p>
       <p class="secure">Reviews are checked before they appear. Private feedback goes to the site owner only.</p>
     </form>
     <div id="rdone" class="rdone" hidden>
@@ -94,8 +95,8 @@ window.addEventListener('DOMContentLoaded',function(){
     e.preventDefault();
     var name=f.name.value.trim();
     if(f.website.value){ return; }
-    if(!name){ window.toast('Please add your name.'); f.name.focus(); return; }
-    if(!val('overall')){ window.toast('Please choose an overall star rating.'); return; }
+    var rerr=document.getElementById('rerr'); rerr.hidden=true;
+    if(!window.mgmValidate(f)) return;
     var pub=true;
     var p={name:name,role:f.role.value.trim(),overall:val('overall'),look:val('look'),ease:val('ease'),learn:val('learn'),
       liked:f.liked.value.trim(),improve:f.improve.value.trim(),would_use:f.would_use.value,public:pub?'yes':'no',website:''};
@@ -112,7 +113,7 @@ window.addEventListener('DOMContentLoaded',function(){
     fetch(API+'/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)})
       .then(function(r){ return r.json().then(function(d){ if(!r.ok){ throw new Error(d&&d.error||'bad'); } }); })
       .then(done)
-      .catch(function(err){ btn.disabled=false; window.toast(err&&err.message&&err.message!=='bad'?err.message:'Could not send. Please check your connection and try again.'); });
+      .catch(function(err){ btn.disabled=false; rerr.textContent=err&&err.message&&err.message!=='bad'&&err.message!=='Failed to fetch'?err.message:'Could not send. Please check your connection and try again.'; rerr.hidden=false; });
   });
 });
 </script>
@@ -123,7 +124,7 @@ window.addEventListener('DOMContentLoaded',function(){
       <div>
         <a class="brand" style="color:#fff" href="index.html">Meet<i>|</i>Gill Med</a>
         <p class="foot-note">Virtual training instruments for nursing and medical students.</p>
-        <a class="foot-mail" href="mailto:general@meetgillmed.com">general@meetgillmed.com</a>
+        <a class="foot-mail" href="mailto:meetgillmed@gmail.com">meetgillmed@gmail.com</a>
       </div>
       <div><h4>Product</h4><a href="index.html#how">How it works</a><a href="index.html#instruments">Instruments</a><a href="pump.html">Try the pump</a></div>
       <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="review.html">Reviews</a></div>
@@ -134,6 +135,6 @@ window.addEventListener('DOMContentLoaded',function(){
   </div>
 </footer>
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=30"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>

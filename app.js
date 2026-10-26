@@ -189,3 +189,55 @@ window.mgmReviewCard=function(x){
     sec.hidden=false;
   });
 })();
+
+/* ---------- inline form errors: shown right under the field, the moment it is left or changed ---------- */
+(function(){
+  function anchor(el){ return el.type==='checkbox'?(el.closest('label')||el):el; }
+  function msgFor(el){
+    if(el.type==='checkbox') return el.required&&!el.checked?(el.getAttribute('data-msg')||'Please tick this box to continue.'):'';
+    var v=(el.value||'').trim();
+    if(el.required&&!v) return el.getAttribute('data-msg')||(el.tagName==='SELECT'?'Please choose an option.':'Please fill in this field.');
+    if(!v) return '';
+    if(el.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'That email does not look right. It should look like name@example.com.';
+    if(el.minLength>0&&v.length<el.minLength) return el.getAttribute('data-minmsg')||('Please use at least '+el.minLength+' characters.');
+    return '';
+  }
+  function show(el,msg,host){
+    var id='err-'+(el.id||el.name||'x'), old=document.getElementById(id);
+    if(old) old.remove();
+    el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby');
+    var box=el.closest('.field'); if(box) box.classList.remove('bad');
+    if(!msg) return;
+    var p=document.createElement('p'); p.className='ferr'; p.id=id; p.setAttribute('role','alert'); p.textContent=msg;
+    (host||anchor(el)).insertAdjacentElement('afterend',p);
+    el.setAttribute('aria-invalid','true'); el.setAttribute('aria-describedby',id);
+    if(box) box.classList.add('bad');
+  }
+  function checkSet(fs){
+    var ok=!!fs.querySelector('input:checked'), host=fs.querySelector('.stars')||fs.querySelector('.pills')||fs, first=fs.querySelector('input');
+    var id='err-'+(fs.id||first.name), old=document.getElementById(id); if(old) old.remove();
+    if(ok) return null;
+    var p=document.createElement('p'); p.className='ferr'; p.id=id; p.setAttribute('role','alert'); p.textContent=fs.getAttribute('data-req');
+    host.insertAdjacentElement('afterend',p); return first;
+  }
+  function fields(form){
+    return [].slice.call(form.elements).filter(function(e){
+      return /^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)&&e.type!=='hidden'&&e.type!=='radio'&&e.type!=='submit'&&e.type!=='button'&&!e.classList.contains('hp');
+    });
+  }
+  window.mgmValidate=function(form){
+    var bad=null;
+    fields(form).forEach(function(e){ var m=msgFor(e); show(e,m); if(m&&!bad) bad=e; });
+    [].slice.call(form.querySelectorAll('fieldset[data-req]')).forEach(function(fs){ var f=checkSet(fs); if(f&&!bad) bad=f; });
+    if(bad){ try{ bad.scrollIntoView({block:'center',behavior:'smooth'}); bad.focus({preventScroll:true}); }catch(x){} }
+    return !bad;
+  };
+  function bind(form){
+    if(form._mgmv) return; form._mgmv=1;
+    form.addEventListener('focusout',function(ev){ var e=ev.target; if(fields(form).indexOf(e)>-1) show(e,msgFor(e)); });
+    var live=function(ev){ var e=ev.target; if(fields(form).indexOf(e)>-1&&e.getAttribute('aria-invalid')) show(e,msgFor(e)); };
+    form.addEventListener('input',live); form.addEventListener('change',live);
+    form.addEventListener('change',function(ev){ var fs=ev.target.closest&&ev.target.closest('fieldset[data-req]'); if(fs) checkSet(fs); });
+  }
+  document.addEventListener('DOMContentLoaded',function(){ [].slice.call(document.querySelectorAll('form[novalidate]')).forEach(bind); });
+})();

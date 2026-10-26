@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script src="theme.js?v=30"></script>
+<script src="theme.js?v=31"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Contact - MeetGill Med</title>
-<meta name="description" content="Get in touch with MeetGill Med for support, feedback or partnerships.">
+<meta name="description" content="Get in touch with MeetGill Med, and request or vote for the next simulator.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 <header class="nav">
@@ -41,28 +41,70 @@
   </div>
 </section>
 
-<section style="padding-bottom:clamp(64px,9vw,130px)">
+<section style="padding-bottom:clamp(40px,6vw,80px)">
   <div class="wrap contact-grid">
     <div class="rv">
       <h3>Email</h3>
-      <p class="muted" style="margin:10px 0 6px">The quickest way to reach us.</p>
-      <a class="big-mail" href="mailto:general@meetgillmed.com">general@meetgillmed.com</a>
+      <p class="muted" style="margin:10px 0 6px">The quickest way to reach us, for anything.</p>
+      <a class="big-mail" href="mailto:meetgillmed@gmail.com">meetgillmed@gmail.com</a>
       <div class="info-list">
-        <div><b>Support</b><span>Trouble with the pump or your account? Tell us what you were doing and what device you were using. <a class="u" href="mailto:support@meetgillmed.com">support@meetgillmed.com</a></span></div>
-        <div><b>Feedback</b><span>Missing a feature, or a step that does not match your lab? We want to hear it. <a class="u" href="mailto:feedback@meetgillmed.com">feedback@meetgillmed.com</a></span></div>
-        <div><b>Billing and privacy</b><span>Payment questions: <a class="u" href="mailto:billing@meetgillmed.com">billing@meetgillmed.com</a>. Privacy requests: <a class="u" href="mailto:privacy@meetgillmed.com">privacy@meetgillmed.com</a>.</span></div>
-        <div><b>Partnerships</b><span>Educators and programs interested in working together are welcome to write to <a class="u" href="mailto:general@meetgillmed.com">general@meetgillmed.com</a>.</span></div>
+        <div><b>Support</b><span>Trouble with the pump or your account? Tell us what you were doing and what device you were using.</span></div>
+        <div><b>Feedback</b><span>Missing a feature, or a step that does not match your lab? Use the request section below, or write to us.</span></div>
+        <div><b>Partnerships</b><span>Educators and programs interested in working together are welcome to write to us.</span></div>
       </div>
     </div>
     <form id="cf" class="cform rv" style="--d:1" novalidate>
-      <div class="field"><label for="cn">Name</label><input id="cn" name="name" type="text" autocomplete="name" required></div>
-      <div class="field"><label for="ce">Email</label><input id="ce" name="email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="cn">Name</label><input id="cn" name="name" type="text" autocomplete="name" required data-msg="Please enter your name."></div>
+      <div class="field"><label for="ce">Email</label><input id="ce" name="email" type="email" autocomplete="email" required data-msg="Please enter your email address."></div>
       <div class="field"><label for="ct">Topic</label>
         <select id="ct" name="topic"><option>General question</option><option>Support</option><option>Feedback or feature request</option><option>Partnerships</option></select></div>
-      <div class="field"><label for="cm">Message</label><textarea id="cm" name="message" rows="6" required></textarea></div>
+      <div class="field"><label for="cm">Message</label><textarea id="cm" name="message" rows="6" required data-msg="Please write a message."></textarea></div>
       <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send message</button>
       <p class="secure">This form opens your email app with the message ready to send. Nothing is stored on this site.</p>
     </form>
+  </div>
+</section>
+
+<section id="requests" class="rq-sec">
+  <div class="wrap narrow">
+    <span class="over">Help shape what comes next</span>
+    <h2 class="wall-h" style="margin-top:14px">Request a simulator or a change.</h2>
+    <p class="lead" style="margin-bottom:26px">Votes decide what we build and publish first. The more votes a simulator has, the higher it goes on the list.</p>
+    <div class="rq-tabs" role="tablist">
+      <button type="button" class="rq-tab on" data-p="rq-new" role="tab" aria-selected="true">Request a simulator</button>
+      <button type="button" class="rq-tab" data-p="rq-chg" role="tab" aria-selected="false">Change to an existing one</button>
+    </div>
+
+    <div id="rq-new" class="rq-panel">
+      <h3 class="rq-h">Is yours already here? Vote for it.</h3>
+      <div id="rq-list" class="rq-list" aria-live="polite"><p class="wall-empty">Loading requests...</p></div>
+      <p id="rq-msg" class="ferr form-msg" role="alert" hidden></p>
+      <button type="button" class="btn" id="rq-open" style="margin-top:18px">Not listed? Suggest a new simulator</button>
+      <form id="qf" class="cform rq-form" novalidate hidden>
+        <div class="field"><label for="qt">Which simulator would you like?</label>
+          <input id="qt" name="title" type="text" maxlength="80" minlength="3" required data-msg="Please name the simulator you would like." data-minmsg="Please write at least 3 characters." placeholder="For example: Blood pressure monitor">
+          <div id="rq-sim" class="rq-sim" aria-live="polite"></div></div>
+        <div class="field"><label for="qd">What would you practise with it? (optional)</label><textarea id="qd" name="details" rows="3" maxlength="400"></textarea></div>
+        <div class="field"><label for="qn">Your name (optional)</label><input id="qn" name="name" type="text" autocomplete="name" maxlength="40"><small class="hint">Only your first name and last initial are shown.</small></div>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send my request</button>
+        <p id="qf-msg" class="form-msg" role="status" hidden></p>
+      </form>
+    </div>
+
+    <div id="rq-chg" class="rq-panel" hidden>
+      <h3 class="rq-h">Something to change in a simulator?</h3>
+      <p class="muted" style="margin:0 0 18px">Tell us what looks wrong, what is missing, or what does not match your lab. Only we see this.</p>
+      <form id="xf" class="cform rq-form" novalidate>
+        <div class="field"><label for="xs">Which one?</label>
+          <select id="xs" name="simulator" required data-msg="Please choose which simulator this is about."><option value="">Choose one</option><option>Infusion pump</option><option>Another simulator</option><option>The website in general</option></select></div>
+        <div class="field"><label for="xm">What would you like changed?</label><textarea id="xm" name="message" rows="5" maxlength="2000" minlength="5" required data-msg="Please describe what you would like changed." data-minmsg="Please write a little more, at least 5 characters."></textarea></div>
+        <div class="field"><label for="xn">Your name (optional)</label><input id="xn" name="name" type="text" autocomplete="name" maxlength="40"></div>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send</button>
+        <p id="xf-msg" class="form-msg" role="status" hidden></p>
+      </form>
+    </div>
   </div>
 </section>
 <script>
@@ -70,14 +112,117 @@
   var f=document.getElementById('cf');
   f.addEventListener('submit',function(e){
     e.preventDefault();
+    if(!window.mgmValidate(f)) return;
     var n=f.name.value.trim(), em=f.email.value.trim(), m=f.message.value.trim();
-    if(!n||!em||!m||em.indexOf('@')<1){ window.toast('Please fill in your name, a valid email and a message.'); return; }
     var s='[MeetGill Med] '+f.topic.value;
     var b=m+'\n\n-- \n'+n+' ('+em+')';
-    var to={'General question':'general@meetgillmed.com','Support':'support@meetgillmed.com','Feedback or feature request':'feedback@meetgillmed.com','Partnerships':'general@meetgillmed.com'}[f.topic.value]||'general@meetgillmed.com';
-    window.location.href='mailto:'+to+'?subject='+encodeURIComponent(s)+'&body='+encodeURIComponent(b);
+    window.location.href='mailto:meetgillmed@gmail.com?subject='+encodeURIComponent(s)+'&body='+encodeURIComponent(b);
   });
 })();
+
+/* simulator requests: vote for an existing one, or add a new one */
+window.addEventListener('DOMContentLoaded',function(){
+  var API=window.MGM_REVIEWS_API||'';
+  var list=[], voted=[];
+  try{ voted=JSON.parse(localStorage.getItem('mgm_voted')||'[]'); }catch(x){}
+  function el(t,c,x){ var e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e; }
+  function voter(){
+    try{
+      var v=localStorage.getItem('mgm_voter');
+      if(!v){ v=Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(12)),function(b){ return ('0'+b.toString(16)).slice(-2); }).join(''); localStorage.setItem('mgm_voter',v); }
+      return v;
+    }catch(e){ return window._mv||(window._mv=Math.random().toString(16).slice(2)+Date.now().toString(16)+'xx'); }
+  }
+  function say(node,text,bad){ node.textContent=text; node.hidden=!text; node.className='form-msg'+(bad?' ferr':' ok'); }
+  var listBox=document.getElementById('rq-list'), listMsg=document.getElementById('rq-msg');
+  function post(path,body){
+    return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ return r.json().then(function(d){ if(!r.ok) throw new Error(d&&d.error||'bad'); return d; }); });
+  }
+  function failText(err){ return err&&err.message&&err.message!=='bad'&&err.message!=='Failed to fetch'?err.message:'Could not reach the server. Please check your connection and try again.'; }
+
+  function vote(r,btn){
+    if(voted.indexOf(r.id)>-1) return;
+    btn.disabled=true; say(listMsg,'');
+    post('/requests/vote',{id:r.id,voter:voter()}).then(function(){
+      voted.push(r.id); try{ localStorage.setItem('mgm_voted',JSON.stringify(voted)); }catch(x){}
+      r.votes+=1; draw();
+    }).catch(function(err){ btn.disabled=false; say(listMsg,failText(err),true); });
+  }
+  function draw(){
+    listBox.textContent='';
+    if(!list.length){ listBox.appendChild(el('p','wall-empty','No requests yet. Be the first to suggest one.')); return; }
+    list.sort(function(a,b){ return b.votes-a.votes; });
+    list.forEach(function(r,i){
+      var row=el('div','rq-item'), txt=el('div','rq-txt');
+      var t=el('b',null,r.title); if(i===0&&r.votes>0){ t.appendChild(el('span','rq-top','Top priority')); }
+      txt.appendChild(t); if(r.details) txt.appendChild(el('span','rq-d',r.details));
+      var n=el('span','rq-n',r.votes+(r.votes===1?' vote':' votes'));
+      var did=voted.indexOf(r.id)>-1;
+      var b=el('button','btn rq-vote'+(did?' done':''),did?'Voted':'Vote'); b.type='button'; b.disabled=did;
+      b.addEventListener('click',function(){ vote(r,b); });
+      row.appendChild(txt); row.appendChild(n); row.appendChild(b); listBox.appendChild(row);
+    });
+    showSimilar();
+  }
+  function load(){
+    if(!API){ listBox.textContent=''; listBox.appendChild(el('p','wall-empty','Requests are not connected yet.')); return; }
+    fetch(API+'/requests').then(function(r){ return r.json(); }).then(function(d){ list=d.requests||[]; draw(); })
+      .catch(function(){ listBox.textContent=''; listBox.appendChild(el('p','wall-empty','Requests could not be loaded right now.')); });
+  }
+  load();
+
+  /* tabs */
+  [].slice.call(document.querySelectorAll('.rq-tab')).forEach(function(t){
+    t.addEventListener('click',function(){
+      [].slice.call(document.querySelectorAll('.rq-tab')).forEach(function(o){ var on=o===t; o.classList.toggle('on',on); o.setAttribute('aria-selected',on); });
+      ['rq-new','rq-chg'].forEach(function(id){ document.getElementById(id).hidden=(id!==t.getAttribute('data-p')); });
+    });
+  });
+
+  /* new request */
+  var qf=document.getElementById('qf'), qmsg=document.getElementById('qf-msg'), sim=document.getElementById('rq-sim');
+  document.getElementById('rq-open').addEventListener('click',function(){ qf.hidden=false; this.hidden=true; document.getElementById('qt').focus(); });
+  function words(t){ return t.toLowerCase().split(/[^a-z0-9]+/).filter(function(w){ return w.length>=4; }); }
+  function showSimilar(){
+    sim.textContent='';
+    var w=words(qf.title.value); if(!w.length) return;
+    var hit=list.filter(function(r){ var t=r.title.toLowerCase(); return w.some(function(x){ return t.indexOf(x)>-1; }); }).slice(0,3);
+    if(!hit.length) return;
+    sim.appendChild(el('span','rq-sim-h','Already requested. Vote for it instead?'));
+    hit.forEach(function(r){
+      var row=el('div','rq-sim-row'); row.appendChild(el('span',null,r.title+' ('+r.votes+(r.votes===1?' vote)':' votes)')));
+      var did=voted.indexOf(r.id)>-1, b=el('button','btn rq-vote'+(did?' done':''),did?'Voted':'Vote for this'); b.type='button'; b.disabled=did;
+      b.addEventListener('click',function(){ vote(r,b); }); row.appendChild(b); sim.appendChild(row);
+    });
+  }
+  qf.title.addEventListener('input',showSimilar);
+  qf.addEventListener('submit',function(e){
+    e.preventDefault(); say(qmsg,'');
+    if(qf.website.value) return;
+    if(!window.mgmValidate(qf)) return;
+    if(!API){ say(qmsg,'Requests are not connected yet.',true); return; }
+    var btn=qf.querySelector('button[type=submit]'); btn.disabled=true;
+    post('/requests/new',{title:qf.title.value.trim(),details:qf.details.value.trim(),name:qf.name.value.trim(),voter:voter(),website:''}).then(function(d){
+      btn.disabled=false; qf.reset(); sim.textContent='';
+      say(qmsg,d.merged?'That one was already on the list, so we added your vote to "'+d.title+'". Thank you!':'Thank you! Your request is on the list with your vote.');
+      load();
+    }).catch(function(err){ btn.disabled=false; say(qmsg,failText(err),true); });
+  });
+
+  /* change to an existing simulator */
+  var xf=document.getElementById('xf'), xmsg=document.getElementById('xf-msg');
+  xf.addEventListener('submit',function(e){
+    e.preventDefault(); say(xmsg,'');
+    if(xf.website.value) return;
+    if(!window.mgmValidate(xf)) return;
+    if(!API){ say(xmsg,'Sending is not connected yet.',true); return; }
+    var btn=xf.querySelector('button[type=submit]'); btn.disabled=true;
+    post('/feedback',{simulator:xf.simulator.value,message:xf.message.value.trim(),name:xf.name.value.trim(),website:''}).then(function(){
+      btn.disabled=false; xf.reset(); say(xmsg,'Thank you! We read every note and will look at it.');
+    }).catch(function(err){ btn.disabled=false; say(xmsg,failText(err),true); });
+  });
+});
 </script>
 </main>
 <footer>
@@ -86,7 +231,7 @@
       <div>
         <a class="brand" style="color:#fff" href="index.html">Meet<i>|</i>Gill Med</a>
         <p class="foot-note">Virtual training instruments for nursing and medical students.</p>
-        <a class="foot-mail" href="mailto:general@meetgillmed.com">general@meetgillmed.com</a>
+        <a class="foot-mail" href="mailto:meetgillmed@gmail.com">meetgillmed@gmail.com</a>
       </div>
       <div><h4>Product</h4><a href="index.html#how">How it works</a><a href="index.html#instruments">Instruments</a><a href="pump.html">Try the pump</a></div>
       <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="review.html">Reviews</a></div>
@@ -97,6 +242,6 @@
   </div>
 </footer>
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=30"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>
