@@ -256,8 +256,14 @@ html[data-theme=light] .chip{background:#FFFFFF;color:#1d2540;border-color:#B8C1
 html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
 
 /* ---- coach bubble, share box, score history, report buttons, first-time tour ---- */
-#coach{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:45;width:max-content;max-width:min(520px,calc(100vw - 24px));box-sizing:border-box;background:#5B4DE0;color:#fff;border-radius:12px;padding:10px 44px 10px 14px;font-size:14px;font-weight:700;line-height:1.4;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+#coach{position:fixed;left:50%;top:10px;transform:translateX(-50%);text-align:left;z-index:45;width:max-content;max-width:min(520px,calc(100vw - 24px));box-sizing:border-box;background:#5B4DE0;color:#fff;border-radius:12px;padding:10px 44px 10px 14px;font-size:14px;font-weight:700;line-height:1.4;box-shadow:0 10px 28px rgba(0,0,0,.4)}
 #coach.ok{background:#16233F;border:1px solid #5B4DE0}
+#coach .cn{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin-bottom:2px}
+#coach .cb{margin-top:3px}
+/* portrait: while the coach card is up, the pump sits at the top so the card fits underneath */
+body.coachtop #stage{align-items:flex-start;padding-top:4px}
+#coach.cleft{left:8px;transform:none;max-width:calc(100vw - 230px)}
+@media (max-width:600px){ #coach{font-size:13px;line-height:1.3;padding:7px 38px 7px 11px;width:calc(100vw - 16px);max-width:none} #coach .cn{font-size:10.5px;margin-bottom:1px} #coach .cb{margin-top:2px} #coach button{width:32px;height:32px} }
 #coach[hidden]{display:none}
 #coach span{display:block;font-weight:400}
 #coach button{position:absolute;top:4px;right:4px;width:36px;height:36px;background:none;border:none;color:#fff;font-size:16px;cursor:pointer}
@@ -434,7 +440,7 @@ html[data-theme=light] #coach.ok button{color:#16233F}
 </div>
 <div id="report" role="dialog" aria-modal="true" aria-label="Score report"><div class="card"><button id="reportClose" type="button">Close ✕</button><div id="reportBody"></div>
   <div class="rbtns"><button id="reportPrint" type="button">Print or save as PDF</button></div></div></div>
-<div id="coach" role="status" aria-live="polite" hidden><b id="coachT"></b><span id="coachB"></span><button id="coachX" type="button" aria-label="Dismiss">✕</button></div>
+<div id="coach" role="status" aria-live="polite" hidden><span class="cn" id="coachN"></span><b id="coachT"></b><span class="cb" id="coachB"></span><button id="coachX" type="button" aria-label="Dismiss">✕</button></div>
 <div id="tour" role="dialog" aria-labelledby="tourT" hidden><div class="tcard">
   <p class="tn" id="tourN"></p><h2 id="tourT"></h2><p id="tourB"></p>
   <div class="btns"><button id="tourSkip" type="button">Skip tour</button><button id="tourNext" type="button">Next</button></div>
@@ -2441,13 +2447,19 @@ var exam={
     document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#report').classList.contains('show')){ e.stopPropagation(); $('#report').classList.remove('show'); } },true);
     this.preview();
   },
+  coachStep(lead){
+    if(!this.on||this.mode!=='coach') return;
+    const n=this.steps.find(s=>!s.state), k=this.steps.indexOf(n)+1;
+    if(!n){ coach.say('ok','Coach','✓ All steps done','Open Practice & score and press Finish & score.'); return; }
+    coach.say('ok','Coach · step '+k+' of '+this.steps.length,(lead?lead+' ':'')+'Next: '+n.t,COACH_TIPS[n.ev]||'');
+  },
   setMode(m){
     this.mode=m==='exam'?'exam':'coach';
-    if(this.on&&this.mode==='coach') this.runMode='coach';
+    if(this.on&&this.mode==='coach'){ this.runMode='coach'; this.coachStep(); }
     try{ localStorage.setItem('mgm_mode',this.mode); }catch(e){}
     $$('[data-mode]').forEach(b=>{ const on=b.dataset.mode===this.mode; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
     $('#modeTxt').textContent=this.mode==='coach'
-      ?'Coach: the pump tells you right away when a step is wrong, and what the order asks for instead.'
+      ?'Coach: a card under the pump shows your next step and how to do it, and tells you right away when a step is wrong.'
       :'Exam: mistakes are counted quietly and shown in your score at the end, like a real return demo.';
     if(this.mode==='exam') coach.hide();
   },
@@ -2470,12 +2482,13 @@ var exam={
     this.sc=SCENARIOS[i]; this.on=true;
     S.fullLib=!this.sc.ret; { const fl=$('#fullLib'); if(fl) fl.checked=S.fullLib; }
     this.steps=this.sc.steps.map(s=>Object.assign({state:null},s)); this.wrong=[]; this.runMode=this.mode; coach.hide();
+    setTimeout(()=>this.coachStep(),0);
     this.sc.setup();
     $('#scnBrief').textContent=this.sc.brief; $('#scnHintTxt').textContent='';
     $('#scnFinish').disabled=false; $('#scnHint').disabled=false;
     this.progress(); document.body.classList.remove('panelopen');
   },
-  stop(){ this.on=false; this.sc=null; this.steps=[]; $('#scnFinish').disabled=true; $('#scnHint').disabled=true; $('#scnProg').textContent=''; $('#scnHintTxt').textContent=''; },
+  stop(){ coach.hide(); this.on=false; this.sc=null; this.steps=[]; $('#scnFinish').disabled=true; $('#scnHint').disabled=true; $('#scnProg').textContent=''; $('#scnHintTxt').textContent=''; },
   match(s,t,d){
     if(s.ev!==t) return false;
     if(!s.where) return true;
@@ -2493,13 +2506,16 @@ var exam={
       m.state='ok'; this.progress();
       const done=!this.steps.some(s=>!s.state);
       if(done) $('#scnProg').textContent+='  - all steps done! Press Finish & Score.';
-      if(this.mode==='coach') coach.say('ok','✓ '+m.t,done?'All steps done. Open Practice & score and press Finish & score.':'');
+      if(this.mode==='coach') this.coachStep('✓ Done.');
       return;
     }
     const relevant=pend.some(s=>s.ev===type&&(!s.where||s.where.field==null||s.where.field===data.field));
     if(relevant){
       const w={type,data,at:Date.now()}; this.wrong.push(w); this.progress();
-      if(this.mode==='coach'){ const exp=pend.find(s=>s.ev===type); coach.say('bad','Not quite: '+this.describeWrong(w),exp?'The order asks: '+exp.t+'.':''); }
+      if(this.mode==='coach'){
+        const exp=pend.find(s=>s.ev===type), n=this.steps.find(s=>!s.state);
+        coach.say('bad','Coach · not quite','✗ '+this.describeWrong(w),(exp?'The order asks: '+exp.t+'. ':'')+(COACH_TIPS[(exp||n||{}).ev]||''));
+      }
     }
   },
   progress(){
@@ -2547,14 +2563,42 @@ var exam={
 };
 /* ---------- coach bubble: instant feedback in Coach mode ---------- */
 var coach={
-  t:0,
-  say(kind,title,body){
-    const el=$('#coach'); el.className=kind==='ok'?'ok':'';
-    $('#coachT').textContent=title; $('#coachB').textContent=body||'';
-    el.hidden=false; clearTimeout(this.t);
-    this.t=setTimeout(()=>this.hide(),kind==='ok'?2500:7000);
+  /* kind 'ok' = navy card (current step), anything else = violet card (wrong step) */
+  say(kind,label,title,body){
+    const el=$('#coach'); if(!el) return;
+    el.className=kind==='ok'?'ok':'';
+    $('#coachN').textContent=label||''; $('#coachT').textContent=title; $('#coachB').textContent=body||'';
+    el.hidden=false; this.place();
   },
-  hide(){ clearTimeout(this.t); const el=$('#coach'); if(el) el.hidden=true; }
+  /* under the pump when there is room for the card, otherwise at the top of the screen */
+  place(){
+    const el=$('#coach'); if(!el||el.hidden) return;
+    document.body.classList.toggle('coachtop',$('#rig').classList.contains('port'));
+    const r=$('#pump').getBoundingClientRect(), d=$('#doorBar').getBoundingClientRect();
+    const below=Math.max(r.bottom,d.bottom)+8;
+    el.classList.remove('cleft');
+    const fits=innerHeight-below>=el.offsetHeight+8;
+    /* at the top of a landscape screen, keep clear of the Practice & score button on the right */
+    if(!fits&&!document.body.classList.contains('wide')&&innerWidth>600) el.classList.add('cleft');
+    el.style.top=(fits?below:10)+'px';
+  },
+  hide(){ const el=$('#coach'); if(el) el.hidden=true; document.body.classList.remove('coachtop'); }
+};
+window.addEventListener('resize',()=>setTimeout(()=>coach.place(),0));
+/* how to do each kind of step on this pump (Coach mode) */
+const COACH_TIPS={
+  door:'The door key is the button on the far right of the pump. ▲ means Yes on the question screens.',
+  line:'Use the Insert IV line button under the pump.',
+  'giving-set':'Press OK.', 'prime-done':'Press OK.', 'sec-reminder-ok':'Press Start/Stop, then Start/Stop again after checking the line and bag.', ack:'Press OK to acknowledge.',
+  prime:'On this screen ▲ means Yes and ▼ means No.', override:'On this screen ▲ means Yes and ▼ means No.', loadq:'On this screen ▲ means Yes and ▼ means No.',
+  careunit:'From the home screen press OK, then use ▲ ▼ to highlight it and press OK.',
+  profile:'Use ▲ ▼ to highlight it, then press OK.', drug:'Use ▲ ▼ to highlight it, then press OK.', conc:'Use ▲ ▼ to highlight it, then press OK.',
+  ivfluid:'Use ▲ ▼ to highlight it, then press OK.', mode:'Use ▲ ▼ to highlight it, then press OK.', 'sec-menu':'On the running screen use ▼ to reach SECondary, press OK, then pick the item with ▲ ▼ and OK.',
+  'bolus-menu':'Tap the BOL key.', 'unit-change':'Use ▲ ▼ to highlight it, then press OK.',
+  param:'Highlight the field and press OK. ◀ ▶ move between digits, ▲ ▼ change a digit, OK saves it.',
+  weight:'◀ ▶ move between digits, ▲ ▼ change a digit, OK saves it.',
+  titrate:'Press OK within 20 seconds to confirm the new value.', hardlimit:'Keep pressing ▲ until the pump stops you at the hard limit.',
+  start:'Press the Start/Stop key.', stop:'Press the Start/Stop key.', standby:'Use ▲ ▼ to highlight it, then press OK.', poweroff:'Hold ON/OFF for 3 seconds.'
 };
 
 /* ---------- score history, saved on this device ---------- */
@@ -2695,6 +2739,7 @@ var tour={
     if(this.hl) this.hl.classList.remove('tour-hl'); this.hl=null;
     $('#tour').hidden=true;
     try{ localStorage.setItem('mgm_tour','1'); }catch(e){}
+    exam.coachStep();
   }
 };
 document.addEventListener('DOMContentLoaded',()=>{ const b=$('#tourAgain'); if(b) b.addEventListener('click',()=>tour.start()); });
