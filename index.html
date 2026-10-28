@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script src="theme.js?v=31"></script>
+<script src="theme.js?v=32"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MeetGill Med - Virtual training instruments</title>
 <meta name="description" content="Virtual training instruments for nursing and medical students. Practice on a realistic infusion pump before you touch the real one.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=31">
-<link rel="stylesheet" href="hero-v2/hero.css?v=31">
+<link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css?v=32">
+<link rel="stylesheet" href="hero-v2/hero.css?v=32">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="announce">Free to use while we are in preview.</div>
 <header class="nav">
   <div class="wrap">
@@ -35,7 +35,7 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
 <!-- HERO v2: sticky scroll-driven 3D pump (see hero-v2/hero.css + hero.js) -->
 <section class="h2 h2--site" id="top" aria-label="Introduction">
   <div class="h2-sticky">
@@ -84,28 +84,28 @@
     <div class="scene__text">
       <article class="step on">
         <span class="over">IV lab · return demo</span>
-        <span class="n">01</span>
+        <span class="n" aria-hidden="true">01</span>
         <h3>Ace your IV return demo</h3>
         <p>Rehearse the exact sequence your instructor marks: load the line, prime it, program the infusion and start. Repeat it until it is automatic.</p>
         <div class="lcd-inline">Prime IV line?<br>Priming… 25 mL<br>OK to stop</div>
       </article>
       <article class="step">
         <span class="over">IV math</span>
-        <span class="n">02</span>
+        <span class="n" aria-hidden="true">02</span>
         <h3>Get the numbers right</h3>
         <p>Rate, volume and time are linked. Enter two and the pump works out the third, so check the order first: 125 ml/h for 500 ml is 4 hours.</p>
         <div class="lcd-inline">Rate 125 ml/h<br>VTBI 500 ml<br>Time 4h00min</div>
       </article>
       <article class="step">
         <span class="over">Alarms</span>
-        <span class="n">03</span>
+        <span class="n" aria-hidden="true">03</span>
         <h3>Know what to do when it alarms</h3>
         <p>Occlusion, open door, end of infusion, low battery. Practise the response here, where a mistake costs nothing.</p>
         <div class="lcd-inline">Upstream occlusion<br>Check roller clamp, bag and drip chamber.</div>
       </article>
       <article class="step">
         <span class="over">Safety limits</span>
-        <span class="n">04</span>
+        <span class="n" aria-hidden="true">04</span>
         <h3>Do not override blindly</h3>
         <p>The drug library stops you at hard limits and asks you to confirm at soft ones. Learn to pause and check before you press OK.</p>
         <div class="lcd-inline">Value ABOVE upper soft limit<br>Soft: 2 - 10 mg/h<br>Override?</div>
@@ -131,16 +131,16 @@
       <a class="card live rv" href="pump.html">
         <div><span class="tag">Live now</span></div>
         <div>
-          <span class="num">01</span>
+          <span class="num" aria-hidden="true">01</span>
           <h3>Infusion pump</h3>
           <p>Load the line, prime, program a primary and a secondary. Practice mode, scored scenarios and a full drug library.</p>
           <span class="arrow-link">Open the pump <span aria-hidden="true">→</span></span>
         </div>
       </a>
-      <div class="card soon rv" style="--d:1"><span class="tag">Coming soon</span><div><span class="num">02</span><h3>Syringe pump</h3></div></div>
-      <div class="card soon rv" style="--d:2"><span class="tag">Coming soon</span><div><span class="num">03</span><h3>Patient monitor</h3></div></div>
-      <div class="card soon rv" style="--d:3"><span class="tag">Coming soon</span><div><span class="num">04</span><h3>Glucometer</h3></div></div>
-      <div class="card soon rv" style="--d:4"><span class="tag">Coming soon</span><div><span class="num">05</span><h3>PCA pump</h3></div></div>
+      <div class="card soon rv" style="--d:1"><span class="tag">Coming soon</span><div><span class="num" aria-hidden="true">02</span><h3>Syringe pump</h3></div></div>
+      <div class="card soon rv" style="--d:2"><span class="tag">Coming soon</span><div><span class="num" aria-hidden="true">03</span><h3>Patient monitor</h3></div></div>
+      <div class="card soon rv" style="--d:3"><span class="tag">Coming soon</span><div><span class="num" aria-hidden="true">04</span><h3>Glucometer</h3></div></div>
+      <div class="card soon rv" style="--d:4"><span class="tag">Coming soon</span><div><span class="num" aria-hidden="true">05</span><h3>PCA pump</h3></div></div>
     </div>
   </div>
 </section>
@@ -191,7 +191,7 @@
     <div class="foot-grid">
       <div>
         <a class="brand" style="color:#fff" href="index.html">Meet<i>|</i>Gill Med</a>
-        <p class="foot-note">Virtual training instruments for nursing and medical students.</p>
+        <p class="foot-note">Virtual training instruments for nursing and medical students. Based in Winnipeg, Manitoba, Canada.</p>
         <a class="foot-mail" href="mailto:meetgillmed@gmail.com">meetgillmed@gmail.com</a>
       </div>
       <div><h4>Product</h4><a href="index.html#how">How it works</a><a href="index.html#instruments">Instruments</a><a href="pump.html">Try the pump</a></div>
@@ -208,8 +208,9 @@
 
 
 
+
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=31"></script>
-<script src="hero-v2/hero.js?v=31"></script>
+<script src="app.js?v=32"></script>
+<script src="hero-v2/hero.js?v=32"></script>
 </body>
 </html>
