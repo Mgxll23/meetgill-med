@@ -56,7 +56,10 @@
   /* ---------- nav ---------- */
   var nav=document.querySelector('.nav');
   var mb=document.querySelector('.menu-btn');
-  if(mb) mb.addEventListener('click',function(){ var o=nav.classList.toggle('open'); mb.setAttribute('aria-expanded',o); });
+  if(mb) mb.addEventListener('click',function(){ var o=nav.classList.toggle('open'); mb.setAttribute('aria-expanded',o);
+    /* the menu links come before this button, so move keyboard focus into the open menu */
+    if(o){ var first=[].filter.call(nav.querySelectorAll('a[href]:not(.brand)'),function(a){ return a.getClientRects().length; })[0]; if(first) first.focus(); } });
+  if(mb) document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&nav.classList.contains('open')){ nav.classList.remove('open'); mb.setAttribute('aria-expanded','false'); mb.focus(); } });
   function onScroll(){ if(nav) nav.classList.toggle('scrolled',window.scrollY>8); }
   window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
 
@@ -143,7 +146,9 @@
     b.addEventListener('click',function(e){ e.stopPropagation(); var o=s.classList.toggle('open'); b.setAttribute('aria-expanded',o); closeAll(s); });
   });
   document.addEventListener('click',function(){ closeAll(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeAll(); } });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){
+    var inSub=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.has-sub.open');
+    closeAll(); if(inSub) inSub.querySelector('.sub-btn').focus(); } });
 })();
 
 

@@ -415,6 +415,7 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
 .cform .field textarea,.cform .field select{border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;font:400 16px var(--f-body);background:#fff;color:var(--text);width:100%}
 .cform .field select{height:52px;padding:0 12px}
 .cform .field textarea:focus,.cform .field select:focus{border-color:var(--violet);outline:none}
+.cform .field textarea:focus-visible,.cform .field select:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
 @media (max-width:900px){.contact-grid{grid-template-columns:1fr}}
 
 /* ---- instruments dropdown ---- */
