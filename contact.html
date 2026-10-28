@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script src="theme.js?v=36"></script>
+<script src="theme.js?v=37"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Contact - MeetGill Med</title>
 <meta name="description" content="Get in touch with MeetGill Med, and request or vote for the next simulator.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316233F'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' stroke='%23A79CFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=37">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -18,15 +18,13 @@
     <a class="brand" href="index.html">Meet<i>|</i>Gill Med</a>
     <ul>
       <li><a href="index.html#how">How it works</a></li>
-      <li class="has-sub"><button class="sub-btn" type="button" aria-expanded="false" aria-controls="sub-inst">Instruments <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="sub" id="sub-inst"><a class="sub-item" href="pump.html"><b>Infusion pump</b><span class="tag-live">Live now</span></a><span class="sub-item soon"><b>Syringe pump</b><span>Coming soon</span></span><span class="sub-item soon"><b>Patient monitor</b><span>Coming soon</span></span><span class="sub-item soon"><b>Glucometer</b><span>Coming soon</span></span><span class="sub-item soon"><b>PCA pump</b><span>Coming soon</span></span><a class="sub-all" href="index.html#instruments">See all instruments</a></div></li>
+      <li class="has-sub"><button class="sub-btn" type="button" aria-expanded="false" aria-controls="sub-inst">Instruments <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="sub" id="sub-inst"><a class="sub-item" href="pump.html"><b>Infusion pump</b><span class="tag-live">Live now</span></a><a class="sub-all" href="index.html#instruments">See all instruments</a></div></li>
       <li><a href="review.html">Reviews</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html" aria-current="page">Contact</a></li>
-      <li class="only-mobile"><a href="signin.html">Sign in</a></li>
       <li class="only-mobile"><a href="pump.html">Try the pump</a></li>
     </ul>
     <div class="nav-cta">
-      <a class="nav-link" href="signin.html">Sign in</a>
       <a class="btn solid" href="pump.html">Try the pump</a>
       <button class="menu-btn" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
@@ -84,7 +82,7 @@
         <div class="field"><label for="qt">Which simulator would you like?</label>
           <input id="qt" name="title" type="text" maxlength="80" minlength="3" required data-msg="Please name the simulator you would like." data-minmsg="Please write at least 3 characters." placeholder="For example: Blood pressure monitor">
           <div id="rq-sim" class="rq-sim" aria-live="polite"></div></div>
-        <div class="field"><label for="qd">What would you practise with it? (optional)</label><textarea id="qd" name="details" rows="3" maxlength="400"></textarea></div>
+        <div class="field"><label for="qd">What would you practice with it? (optional)</label><textarea id="qd" name="details" rows="3" maxlength="400"></textarea></div>
         <div class="field"><label for="qn">Your name (optional)</label><input id="qn" name="name" type="text" autocomplete="name" maxlength="40"><small class="hint">Only your first name and last initial are shown.</small></div>
         <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
         <button class="btn solid" type="submit" style="width:100%;min-height:56px">Send my request</button>
@@ -243,6 +241,6 @@ window.addEventListener('DOMContentLoaded',function(){
   </div>
 </footer>
 <div class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

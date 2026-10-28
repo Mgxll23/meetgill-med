@@ -254,6 +254,56 @@ html[data-theme=light] .wrong{color:#b91c1c}
 html[data-theme=light] #doorTxt{color:#4a5470}
 html[data-theme=light] .chip{background:#FFFFFF;color:#1d2540;border-color:#B8C1DB}
 html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
+
+/* ---- coach bubble, share box, score history, report buttons, first-time tour ---- */
+#coach{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:45;width:max-content;max-width:min(520px,calc(100vw - 24px));box-sizing:border-box;background:#5B4DE0;color:#fff;border-radius:12px;padding:10px 44px 10px 14px;font-size:14px;font-weight:700;line-height:1.4;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+#coach.ok{background:#16233F;border:1px solid #5B4DE0}
+#coach[hidden]{display:none}
+#coach span{display:block;font-weight:400}
+#coach button{position:absolute;top:4px;right:4px;width:36px;height:36px;background:none;border:none;color:#fff;font-size:16px;cursor:pointer}
+body.wide #coach{left:calc(50% - 200px)}
+#shareBox{margin-top:8px}
+#shareBox[hidden]{display:none}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #26335A;font-size:13.5px}
+.hist li b{font-weight:800;white-space:nowrap}
+.hist .ht{min-width:0}
+.hist .hm{display:block;font-size:12px;color:#9aa1aa}
+.rmeta{margin:0 0 10px;font-size:12.5px;color:#9aa1aa;padding-right:90px}
+.best{margin:6px 0 0;font-size:14px}
+.rbtns{display:flex;gap:8px;margin-top:16px}
+.rbtns button{flex:1;height:44px;border-radius:8px;border:1px solid #5B4DE0;background:#5B4DE0;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+#tour{position:fixed;left:0;right:0;z-index:48;display:flex;justify-content:center;padding:12px;pointer-events:none}
+#tour[hidden]{display:none}
+#tour.top{top:0}#tour.bot{bottom:0}
+body.wide #tour{right:400px}
+#tour .tcard{pointer-events:auto;background:#101A33;color:#e8eaed;border:1px solid #5B4DE0;border-radius:14px;padding:14px 16px;max-width:420px;width:100%;box-sizing:border-box;box-shadow:0 14px 36px rgba(0,0,0,.5)}
+#tour .tn{margin:0;font-size:12px;font-weight:700;color:#A79CFF;letter-spacing:.06em;text-transform:uppercase}
+#tour h2{margin:4px 0 6px;font-size:17px}
+#tour p{margin:0;font-size:14px;line-height:1.45}
+#tour .btns{display:flex;gap:8px;margin-top:12px}
+#tour .btns button{flex:1;height:44px;border-radius:8px;border:1px solid #33457A;background:#1B2850;color:#e8eaed;font-size:14px;cursor:pointer}
+#tour #tourNext{background:#5B4DE0;border-color:#5B4DE0;color:#fff;font-weight:700}
+.tour-hl{outline:3px solid #A79CFF!important;outline-offset:4px}
+#modeSeg button:focus-visible,#tour button:focus-visible,.rbtns button:focus-visible,#coach button:focus-visible{outline:3px solid #B7AEFF;outline-offset:2px}
+html[data-theme=light] #tour .tcard{background:#FFFFFF;color:#111827}
+html[data-theme=light] #tour .btns button{background:#EEF0FA;color:#111827;border-color:#C5CDE3}
+html[data-theme=light] #tour #tourNext{background:#5B4DE0;border-color:#5B4DE0;color:#fff}
+html[data-theme=light] #tour .tn{color:#5B4DE0}
+html[data-theme=light] .hist li{border-bottom-color:#E1E5F2}
+html[data-theme=light] .hist .hm,html[data-theme=light] .rmeta{color:#5b6480}
+html[data-theme=light] #coach.ok{background:#FFFFFF;color:#16233F}
+html[data-theme=light] #coach.ok button{color:#16233F}
+@media print{
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;color:#000!important}
+  body>*:not(#report){display:none!important}
+  #report,#report.show{display:block!important;position:static!important;background:none!important;padding:0!important}
+  #report .card{max-height:none!important;overflow:visible!important;background:#fff!important;color:#000!important;padding:0!important}
+  #reportClose,.rbtns{display:none!important}
+  .walk{background:#f2f2f2!important;color:#000!important}
+  .rmeta,#report h3{color:#333!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style></head><body>
 <div id="stage">
  <div id="pumpWrap"><div id="rig" class="land">
@@ -312,17 +362,25 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
   <div class="ph"><b>Practice &amp; controls</b><button id="panelClose" type="button">✕</button></div>
   <section>
     <h3>Return demo practice</h3>
-    <select id="scnSel"></select>
+    <div class="lab" id="modeLab">Feedback while you work</div>
+    <div class="btns seg" id="modeSeg" role="group" aria-labelledby="modeLab"><button type="button" data-mode="coach">Coach</button><button type="button" data-mode="exam">Exam</button></div>
+    <p id="modeTxt" class="small"></p>
+    <select id="scnSel" aria-label="Scenario"></select>
     <div class="btns"><button id="scnStart" type="button">Start scenario</button><button id="scnFree" type="button">Free practice</button></div>
     <p id="scnBrief" class="brief"></p>
     <label class="chk"><input type="checkbox" id="fullLib"> Full drug-library mode (extra steps: profile + category)</label>
     <div id="scnProg" class="prog"></div>
     <div class="btns"><button id="scnHint" type="button" disabled>Hint</button><button id="scnFinish" type="button" disabled>Finish &amp; score</button></div>
     <p id="scnHintTxt" class="hint"></p>
+    <div class="btns"><button id="scnShare" type="button">Share this scenario</button></div>
+    <div id="shareBox" hidden>
+      <input id="shareUrl" type="text" readonly aria-label="Share link for this scenario">
+      <p id="shareMsg" class="small"></p>
+    </div>
   </section>
   <section id="mySec">
     <h3>Make your own scenario</h3>
-    <p class="small">Not using the ready-made ones? Build your own order to practise. It is saved on this device only.</p>
+    <p class="small">Not using the ready-made ones? Build your own order to practice. It is saved on this device only.</p>
     <div class="btns"><button id="myOpen" type="button">Create a scenario</button><button id="myDel" type="button" class="warnbtn" hidden>Delete selected</button></div>
     <form id="myForm" novalidate hidden>
       <div class="lab">Name (optional)</div><input id="myTitle" type="text" maxlength="60" placeholder="For example: Heparin for Mr. Lee">
@@ -346,6 +404,12 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
       <p id="myMsg" class="small"></p>
     </form>
   </section>
+  <section id="histSec">
+    <h3>Your scores</h3>
+    <p id="histEmpty" class="small">Finish a scenario and your score shows up here. Scores are saved on this device only.</p>
+    <ol id="histList" class="hist"></ol>
+    <div class="btns"><button id="histClear" type="button" class="warnbtn" hidden>Clear scores</button></div>
+  </section>
   <section>
     <h3>Simulation</h3>
     <div class="lab">Practice speed (infusion &amp; timers)</div>
@@ -360,6 +424,7 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
     <h3>Keys</h3>
     <p class="small">Keys, top row: <b>C</b> (clear/back), <b>BOL</b> (tap = programmed bolus, hold = manual bolus), <b>ON/OFF</b> (hold 3 s). Bottom row: <b>OK</b>, <b>violet chevrons</b> (auto-program), <b>Start/Stop</b>. Far right: <b>door</b>. Hold ▶ while infusing for macro mode.</p>
     <p class="small">Desktop keyboard: arrows, Enter = OK, Esc/Backspace = C, Space or S = Start/Stop, X = door, M = auto-program, hold B = bolus, hold P = ON/OFF.</p>
+    <div class="btns"><button id="tourAgain" type="button">Show the pump tour</button></div>
   </section>
   <section>
     <h3>About</h3>
@@ -367,7 +432,13 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
   </section>
  </aside>
 </div>
-<div id="report"><div class="card"><button id="reportClose" type="button">Close ✕</button><div id="reportBody"></div></div></div>
+<div id="report" role="dialog" aria-modal="true" aria-label="Score report"><div class="card"><button id="reportClose" type="button">Close ✕</button><div id="reportBody"></div>
+  <div class="rbtns"><button id="reportPrint" type="button">Print or save as PDF</button></div></div></div>
+<div id="coach" role="status" aria-live="polite" hidden><b id="coachT"></b><span id="coachB"></span><button id="coachX" type="button" aria-label="Dismiss">✕</button></div>
+<div id="tour" role="dialog" aria-labelledby="tourT" hidden><div class="tcard">
+  <p class="tn" id="tourN"></p><h2 id="tourT"></h2><p id="tourB"></p>
+  <div class="btns"><button id="tourSkip" type="button">Skip tour</button><button id="tourNext" type="button">Next</button></div>
+</div></div>
 <script>
 /* ===================================================================
    DATA — drug library (ILLUSTRATIVE ONLY, not clinical reference)
@@ -2060,8 +2131,12 @@ function bindPanel(){
 window.addEventListener('DOMContentLoaded',()=>{
   loadStore(); bindButtons(); bindPanel(); exam.init(); fit(); draw(); exam.start(0);
   /* pump.html#practice (the home page "Practice mode" button) opens the practice panel on smaller screens */
-  const openPractice=()=>{ if(location.hash==='#practice'&&!document.body.classList.contains('wide')) document.body.classList.add('panelopen'); };
+  const openPractice=()=>{
+    if(/^#(practice|s=|scn=)/.test(location.hash)&&!document.body.classList.contains('wide')) document.body.classList.add('panelopen');
+    share.apply();
+  };
   openPractice(); window.addEventListener('hashchange',openPractice);
+  tour.auto();
   setInterval(()=>{ tick(); draw(); },250);
   setInterval(()=>{ if(S.power==='on') save(); },5000);
   window.addEventListener('beforeunload',save);
@@ -2344,9 +2419,17 @@ function buildCustom(c){
 loadCustom().forEach(c=>{ try{ SCENARIOS.push(buildCustom(c)); }catch(e){} });
 
 var exam={
-  sc:null, steps:[], wrong:[], on:false,
+  sc:null, steps:[], wrong:[], on:false, mode:'coach', runMode:'coach',
   init(){
     const sel=$('#scnSel');
+    try{ if(localStorage.getItem('mgm_mode')==='exam') this.mode='exam'; }catch(e){}
+    $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>this.setMode(b.dataset.mode)));
+    this.setMode(this.mode);
+    $('#coachX').addEventListener('click',()=>coach.hide());
+    $('#reportPrint').addEventListener('click',()=>window.print());
+    $('#scnShare').addEventListener('click',()=>share.show(+sel.value));
+    sel.addEventListener('change',()=>{ $('#shareBox').hidden=true; });
+    scores.init();
     this.fillSel();
     const fl=$('#fullLib'); if(fl) fl.addEventListener('change',()=>{ S.fullLib=fl.checked; });
     sel.addEventListener('change',()=>{ this.preview(); if(window.myScnSync) window.myScnSync(); });
@@ -2355,7 +2438,18 @@ var exam={
     $('#scnFinish').addEventListener('click',()=>this.finish());
     $('#scnFree').addEventListener('click',()=>{ this.stop(); hardReset(); $('#scnBrief').textContent='Free practice: the pump behaves like the real device. Hold ON/OFF 3 s to start.'; });
     $('#reportClose').addEventListener('click',()=>$('#report').classList.remove('show'));
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#report').classList.contains('show')){ e.stopPropagation(); $('#report').classList.remove('show'); } },true);
     this.preview();
+  },
+  setMode(m){
+    this.mode=m==='exam'?'exam':'coach';
+    if(this.on&&this.mode==='coach') this.runMode='coach';
+    try{ localStorage.setItem('mgm_mode',this.mode); }catch(e){}
+    $$('[data-mode]').forEach(b=>{ const on=b.dataset.mode===this.mode; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+    $('#modeTxt').textContent=this.mode==='coach'
+      ?'Coach: the pump tells you right away when a step is wrong, and what the order asks for instead.'
+      :'Exam: mistakes are counted quietly and shown in your score at the end, like a real return demo.';
+    if(this.mode==='exam') coach.hide();
   },
   fillSel(keep){
     const sel=$('#scnSel'); sel.textContent='';
@@ -2375,7 +2469,7 @@ var exam={
   start(i){
     this.sc=SCENARIOS[i]; this.on=true;
     S.fullLib=!this.sc.ret; { const fl=$('#fullLib'); if(fl) fl.checked=S.fullLib; }
-    this.steps=this.sc.steps.map(s=>Object.assign({state:null},s)); this.wrong=[];
+    this.steps=this.sc.steps.map(s=>Object.assign({state:null},s)); this.wrong=[]; this.runMode=this.mode; coach.hide();
     this.sc.setup();
     $('#scnBrief').textContent=this.sc.brief; $('#scnHintTxt').textContent='';
     $('#scnFinish').disabled=false; $('#scnHint').disabled=false;
@@ -2395,9 +2489,18 @@ var exam={
     if(!this.on) return;
     const pend=this.steps.filter(s=>!s.state);
     const m=pend.find(s=>this.match(s,type,data));
-    if(m){ m.state='ok'; this.progress(); if(!this.steps.some(s=>!s.state)) $('#scnProg').textContent+='  - all steps done! Press Finish & Score.'; return; }
+    if(m){
+      m.state='ok'; this.progress();
+      const done=!this.steps.some(s=>!s.state);
+      if(done) $('#scnProg').textContent+='  - all steps done! Press Finish & Score.';
+      if(this.mode==='coach') coach.say('ok','✓ '+m.t,done?'All steps done. Open Practice & score and press Finish & score.':'');
+      return;
+    }
     const relevant=pend.some(s=>s.ev===type&&(!s.where||s.where.field==null||s.where.field===data.field));
-    if(relevant){ this.wrong.push({type,data,at:Date.now()}); this.progress(); }
+    if(relevant){
+      const w={type,data,at:Date.now()}; this.wrong.push(w); this.progress();
+      if(this.mode==='coach'){ const exp=pend.find(s=>s.ev===type); coach.say('bad','Not quite: '+this.describeWrong(w),exp?'The order asks: '+exp.t+'.':''); }
+    }
   },
   progress(){
     const ok=this.steps.filter(s=>s.state==='ok').length;
@@ -2427,17 +2530,174 @@ var exam={
     const ok=this.steps.filter(s=>s.state==='ok').length, tot=this.steps.length;
     const missed=this.steps.filter(s=>!s.state);
     const score=Math.max(0,Math.round(100*ok/tot-10*this.wrong.length));
+    const prev=scores.forScn(this.sc.id), now=new Date();
     let h='<h2>'+esc(this.sc.title)+'</h2>';
+    h+='<p class="rmeta">MeetGill Med practice report · '+esc(now.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}))+' · '+(this.runMode==='coach'?'Coach mode':'Exam mode')+'</p>';
     h+='<div class="score '+(score>=80?'good':score>=60?'mid':'bad')+'">'+score+'%</div>';
+    if(prev.length){ const best=Math.max.apply(null,prev.map(x=>x.s)); h+='<p class="best">'+(score>best?'New best! Your previous best was '+best+'%':'Your best on this scenario: '+best+'%')+' ('+(prev.length+1)+' tries).</p>'; }
     h+='<div class="tally"><span class="ok">'+ok+' correct</span><span class="bad">'+this.wrong.length+' incorrect</span><span class="miss">'+missed.length+' missed</span></div>';
     h+='<h3>Step by step</h3><ol class="steps">'+this.steps.map(s=>'<li class="'+(s.state==='ok'?'ok':'miss')+'">'+(s.state==='ok'?'✓ ':'✗ ')+esc(s.t)+'</li>').join('')+'</ol>';
     if(this.wrong.length) h+='<h3>Incorrect entries</h3><ul class="wrong">'+this.wrong.map(w=>'<li>'+esc(this.describeWrong(w))+'</li>').join('')+'</ul>';
     h+='<h3>Correct walkthrough</h3><p class="walk">'+esc(this.sc.walk)+'</p>';
-    h+='<p class="small">Scoring: 100 x correct/total, minus 10 per incorrect entry.</p>';
-    $('#reportBody').innerHTML=h; $('#report').classList.add('show');
-    this.on=false; $('#scnFinish').disabled=true;
+    h+='<p class="small">Scoring: 100 x correct/total, minus 10 per incorrect entry. Practice result from an unofficial simulator, not a clinical competency assessment.</p>';
+    $('#reportBody').innerHTML=h; $('#report').classList.add('show'); $('#reportClose').focus();
+    scores.add({id:this.sc.id,t:this.sc.title,s:score,ok,n:tot,w:this.wrong.length,m:this.runMode,at:now.getTime()});
+    this.on=false; $('#scnFinish').disabled=true; coach.hide();
   }
 };
+/* ---------- coach bubble: instant feedback in Coach mode ---------- */
+var coach={
+  t:0,
+  say(kind,title,body){
+    const el=$('#coach'); el.className=kind==='ok'?'ok':'';
+    $('#coachT').textContent=title; $('#coachB').textContent=body||'';
+    el.hidden=false; clearTimeout(this.t);
+    this.t=setTimeout(()=>this.hide(),kind==='ok'?2500:7000);
+  },
+  hide(){ clearTimeout(this.t); const el=$('#coach'); if(el) el.hidden=true; }
+};
+
+/* ---------- score history, saved on this device ---------- */
+var scores={
+  KEY:'mgm_scores',
+  all(){ try{ const a=JSON.parse(localStorage.getItem(this.KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } },
+  forScn(id){ return this.all().filter(x=>x.id===id); },
+  add(r){ const a=this.all(); a.push(r); try{ localStorage.setItem(this.KEY,JSON.stringify(a.slice(-100))); }catch(e){} this.render(); },
+  init(){
+    const b=$('#histClear'); let armed=0;
+    b.addEventListener('click',()=>{
+      if(!armed){ b.textContent='Tap again to clear all scores'; armed=setTimeout(()=>{ armed=0; b.textContent='Clear scores'; },4000); return; }
+      clearTimeout(armed); armed=0; b.textContent='Clear scores';
+      try{ localStorage.removeItem(this.KEY); }catch(e){}
+      this.render();
+    });
+    this.render();
+  },
+  render(){
+    const a=this.all().slice(-10).reverse(), ol=$('#histList'); ol.textContent='';
+    a.forEach(x=>{
+      const li=document.createElement('li'), t=document.createElement('span'), m=document.createElement('span'), b=document.createElement('b');
+      t.className='ht'; t.textContent=x.t;
+      m.className='hm'; m.textContent=new Date(x.at).toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+(x.m==='exam'?'Exam':'Coach')+' · '+x.ok+'/'+x.n+' steps, '+x.w+' wrong';
+      t.appendChild(m); b.textContent=x.s+'%'; li.appendChild(t); li.appendChild(b); ol.appendChild(li);
+    });
+    $('#histEmpty').hidden=a.length>0; $('#histClear').hidden=!a.length;
+  }
+};
+
+/* ---------- share a scenario as a link: ready-made ones by id, your own ones packed into the link ---------- */
+function validCfg(c){
+  if(!c||typeof c!=='object') return null;
+  const str=(v,n)=>typeof v==='string'?v.slice(0,n).trim():'', num=v=>typeof v==='number'&&isFinite(v)?v:NaN;
+  const title=str(c.title,60), note=str(c.note,300);
+  if(c.kind==='ivf'){
+    const rate=num(c.rate), vtbi=num(c.vtbi);
+    if(!(rate>0&&rate<=999&&vtbi>0&&vtbi<=9999&&vtbi/rate<=99)) return null;
+    return {kind:'ivf',rate,vtbi,title:title||'IV fluid '+fmt(rate)+' ml/h, VTBI '+fmt(vtbi)+' ml',note};
+  }
+  if(c.kind!=='drug') return null;
+  const d=DRUGS.find(x=>x.id===c.drug&&x.du&&!x.load&&x.m.join('')==='C'&&x.role!=='S'); if(!d) return null;
+  const unit=c.unit, prof=c.profile;
+  if(typeof unit!=='string'||typeof prof!=='string'||d.u.indexOf(unit)<0||d.pr.indexOf(prof)<0) return null;
+  const conc=Number.isInteger(c.conc)&&c.conc>=0&&c.conc<Math.max(1,(d.c||[]).length)?c.conc:0;
+  let weight=0;
+  if(/\/kg/.test(d.du)){ weight=num(c.weight); const w=WEIGHT_SOFT[prof]; if(!w||!(weight>=w[0]&&weight<=w[1])) return null; }
+  const dose=num(c.dose); if(!(dose>0)) return null;
+  const l=lim({kind:'lib',drug:d,unit,profile:prof},'doserate');
+  if(l&&dose>l.hh+1e-9) return null;
+  const soft=!!(l&&(dose<l.sl-1e-9||dose>l.sh+1e-9));
+  const vtbi=c.vtbi==null?0:num(c.vtbi); if(!(vtbi>=0&&vtbi<=9999)) return null;
+  return {kind:'drug',drug:d.id,unit,profile:prof,conc,weight,dose,vtbi,soft,title:title||d.s+' '+fmt(dose)+' '+d.du,note};
+}
+var share={
+  enc(t){ return btoa(unescape(encodeURIComponent(t))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); },
+  dec(t){ t=t.replace(/-/g,'+').replace(/_/g,'/'); while(t.length%4) t+='='; return decodeURIComponent(escape(atob(t))); },
+  url(i){
+    const s=SCENARIOS[i]; if(!s) return '';
+    let h;
+    if(s.mine){ const c=loadCustom().find(x=>x.id===s.id), v=c&&validCfg(c); if(!v) return ''; h='#s='+this.enc(JSON.stringify(v)); }
+    else h='#scn='+encodeURIComponent(s.id);
+    return new URL('../pump.html',location.href).href.split('#')[0]+h;
+  },
+  show(i){
+    const u=this.url(i), box=$('#shareBox'), inp=$('#shareUrl'), msg=$('#shareMsg');
+    box.hidden=false;
+    if(!u){ inp.value=''; msg.textContent='This scenario cannot be shared.'; return; }
+    inp.value=u; inp.focus(); inp.select();
+    const mine=SCENARIOS[i].mine;
+    const tail=mine?' Anyone who opens it gets this scenario added to their list. They will see its name and notes, so leave out real patient details.':' Anyone who opens it lands on this scenario, ready to start.';
+    const done=ok=>{ msg.textContent=(ok?'Link copied.':'Copy the link above.')+tail; };
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(()=>done(true),()=>done(false)); else done(false);
+  },
+  last:'',
+  apply(){
+    const h=location.hash; if(h===this.last) return; this.last=h;
+    let i=-1, msg='';
+    if(h.indexOf('#scn=')===0){
+      const id=decodeURIComponent(h.slice(5)); i=SCENARIOS.findIndex(s=>!s.mine&&s.id===id);
+      msg=i<0?'That share link points to a scenario this pump does not have.':'Shared scenario selected. Read the order above, then press Start scenario.';
+    } else if(h.indexOf('#s=')===0){
+      let v=null; try{ if(h.length<3000) v=validCfg(JSON.parse(this.dec(h.slice(3)))); }catch(e){}
+      if(!v) msg='That share link is not a valid scenario. Ask for a new link.';
+      else {
+        const same=JSON.stringify(v);
+        i=SCENARIOS.findIndex(s=>{ if(!s.mine) return false; const c=loadCustom().find(x=>x.id===s.id); return c&&JSON.stringify(validCfg(c))===same; });
+        if(i>=0) msg='You already have this shared scenario. It is selected: press Start scenario.';
+        else {
+          const all=loadCustom();
+          if(all.length>=30) msg='You have 30 scenarios saved. Delete one, then open the link again.';
+          else { const c=Object.assign({id:'my-'+Date.now()},v); all.push(c); saveCustom(all); SCENARIOS.push(buildCustom(c)); i=SCENARIOS.length-1; msg='Shared scenario added to My scenarios. Read the order above, then press Start scenario.'; }
+        }
+      }
+    } else return;
+    if(i>=0){ exam.stop(); exam.fillSel(i); exam.preview(); }
+    $('#scnHintTxt').textContent=msg;
+  }
+};
+
+/* ---------- first-time tour of the pump ---------- */
+var tour={
+  i:0, hl:null,
+  steps(){
+    const wide=document.body.classList.contains('wide');
+    return [
+      {sel:'#pump',t:'This is the pump',b:'It works like the real device. Press its keys with your mouse or finger, or use your keyboard.'},
+      {sel:'#lcd',t:'Read the screen',b:'The screen shows what each key does right now. Follow it one step at a time.'},
+      {sel:'#doorBar',t:'Load the line',b:'Use Insert IV line, the clamp and the door to load the line, like at the bedside.'},
+      {sel:wide?'#scnSel':'#panelBtn',t:'Practice & score',b:'Pick a scenario, get a hint, then finish for a score. Coach mode tells you right away when a step is wrong. Exam mode stays quiet until the end.'},
+      {sel:wide?'#mySec':'#panelBtn',t:'Make it yours',b:'Build your own scenario, share it with a link, and see your past scores. All of it stays on this device.'}
+    ];
+  },
+  auto(){
+    let seen=true; try{ seen=!!localStorage.getItem('mgm_tour'); }catch(e){}
+    if(!seen&&!document.body.classList.contains('panelopen')) setTimeout(()=>this.start(),700);
+  },
+  start(){
+    document.body.classList.remove('panelopen'); coach.hide();
+    $('#tourNext').onclick=()=>this.next(); $('#tourSkip').onclick=()=>this.end();
+    $('#tour').onkeydown=e=>{ if(e.key==='Escape'){ e.stopPropagation(); this.end(); } };
+    this.i=0; $('#tour').hidden=false; this.show();
+  },
+  show(){
+    const st=this.steps(), s=st[this.i];
+    if(this.hl) this.hl.classList.remove('tour-hl');
+    this.hl=$(s.sel); if(this.hl) this.hl.classList.add('tour-hl');
+    $('#tourN').textContent='Pump tour · '+(this.i+1)+' of '+st.length;
+    $('#tourT').textContent=s.t; $('#tourB').textContent=s.b;
+    $('#tourNext').textContent=this.i===st.length-1?'Done':'Next';
+    const r=this.hl?this.hl.getBoundingClientRect():null, el=$('#tour');
+    const top=r&&(r.top+r.height/2>innerHeight/2)&&r.height<innerHeight*.8;
+    el.classList.toggle('top',!!top); el.classList.toggle('bot',!top);
+    $('#tourNext').focus();
+  },
+  next(){ if(this.i<this.steps().length-1){ this.i++; this.show(); } else this.end(); },
+  end(){
+    if(this.hl) this.hl.classList.remove('tour-hl'); this.hl=null;
+    $('#tour').hidden=true;
+    try{ localStorage.setItem('mgm_tour','1'); }catch(e){}
+  }
+};
+document.addEventListener('DOMContentLoaded',()=>{ const b=$('#tourAgain'); if(b) b.addEventListener('click',()=>tour.start()); });
 /* ---------- "make your own scenario" form ---------- */
 (function(){
   const form=$('#myForm'); if(!form) return;
