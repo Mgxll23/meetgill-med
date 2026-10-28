@@ -246,3 +246,18 @@ window.mgmReviewCard=function(x){
   }
   document.addEventListener('DOMContentLoaded',function(){ [].slice.call(document.querySelectorAll('form[novalidate]')).forEach(bind); });
 })();
+
+/* practice screenshots on the home page: tap to enlarge */
+(function(){
+  var zs=document.querySelectorAll('.pm-zoom');
+  if(!zs.length||typeof HTMLDialogElement==='undefined') return;
+  var d=document.createElement('dialog'); d.className='pm-lb'; d.setAttribute('aria-label','Screenshot');
+  d.innerHTML='<button class="pm-lb-x" type="button" aria-label="Close">✕</button><img alt="">';
+  document.body.appendChild(d);
+  var im=d.querySelector('img');
+  d.querySelector('.pm-lb-x').addEventListener('click',function(){ d.close(); });
+  d.addEventListener('click',function(e){ if(e.target===d) d.close(); });
+  [].forEach.call(zs,function(b){ b.addEventListener('click',function(){
+    var i=b.querySelector('img'); im.src=b.getAttribute('data-full')||i.src; im.alt=i.alt; d.showModal();
+  }); });
+})();

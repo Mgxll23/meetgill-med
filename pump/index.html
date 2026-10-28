@@ -46,7 +46,9 @@ body.wide #stage{right:400px}
 #chamber .slot{position:absolute;left:8%;right:8%;top:42%;height:22%;border-radius:8px;background:#0a0b0d;box-shadow:inset 0 2px 6px #000,0 1px 0 rgba(255,255,255,.1)}
 #chamber .tube{position:absolute;left:0;right:0;top:50%;height:5px;background:#4cc3ff;opacity:0;transition:opacity .3s;box-shadow:0 0 6px rgba(76,195,255,.6)}
 .doorgfx.hasline ~ #chamber .tube{opacity:1}
-.pill{position:absolute;top:4px;right:calc(var(--pp) + 6px);z-index:5;background:rgba(255,255,255,.85);border:1px solid #9a9a94;color:#333;border-radius:16px;padding:0 12px;height:30px;font-size:12px}
+.pill{position:absolute;top:4px;right:calc(var(--pp) + 6px);z-index:5;background:#5B4DE0;border:1px solid #5B4DE0;color:#fff;border-radius:16px;padding:0 14px;height:32px;font-size:12.5px;font-weight:700;box-shadow:0 6px 16px -6px rgba(91,77,224,.75);cursor:pointer}
+.pill:hover{background:#4B3DD0}
+.pill:focus-visible{outline:3px solid #B7AEFF;outline-offset:2px}
 body.wide .pill{display:none}
 
 /* ---------- british racing green faceplate ---------- */
@@ -256,7 +258,7 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
 <div id="stage">
  <div id="pumpWrap"><div id="rig" class="land">
   <div id="pump">
-   <button id="panelBtn" class="pill" type="button">☰ Practice</button>
+   <button id="panelBtn" class="pill" type="button">☰ Practice &amp; score</button>
    <div id="lidWrap">
      <div id="doorGfx" class="doorgfx" title="Pump door (tap to open/close)"></div>
      <div id="chamber"><i class="slot"></i><i class="tube"></i></div>
@@ -2057,6 +2059,9 @@ function bindPanel(){
 /* ---------- boot ---------- */
 window.addEventListener('DOMContentLoaded',()=>{
   loadStore(); bindButtons(); bindPanel(); exam.init(); fit(); draw(); exam.start(0);
+  /* pump.html#practice (the home page "Practice mode" button) opens the practice panel on smaller screens */
+  const openPractice=()=>{ if(location.hash==='#practice'&&!document.body.classList.contains('wide')) document.body.classList.add('panelopen'); };
+  openPractice(); window.addEventListener('hashchange',openPractice);
   setInterval(()=>{ tick(); draw(); },250);
   setInterval(()=>{ if(S.power==='on') save(); },5000);
   window.addEventListener('beforeunload',save);
