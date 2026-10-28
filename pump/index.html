@@ -1996,12 +1996,17 @@ window.addEventListener('keydown',e=>{
   if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   const key=e.key.length===1?e.key.toLowerCase():e.key;
   if(e.metaKey||e.ctrlKey||e.altKey) return;
+  /* a focused keypad key: Enter/Space presses that key (held keys release on keyup) */
+  const fk=e.target&&e.target.closest&&e.target.closest('.key[data-k]');
+  if(fk&&(key==='Enter'||key===' ')){ e.preventDefault(); if(!e.repeat){ fk.dispatchEvent(new PointerEvent('pointerdown')); kbNb=fk; } return; }
+  /* any other focused button or link keeps its own Enter/Space */
+  if((key==='Enter'||key===' ')&&e.target&&e.target.closest&&e.target.closest('button,a,summary')) return;
   if(e.repeat){ if(KEYMAP[key]||key==='b') e.preventDefault(); return; }
   if(key==='b'){ const el=document.querySelector('[data-k=nb]'); el.dispatchEvent(new PointerEvent('pointerdown')); kbNb=el; e.preventDefault(); return; }
   if(key==='p'){ const el=document.querySelector('[data-k=pw]'); el.dispatchEvent(new PointerEvent('pointerdown')); kbNb=el; e.preventDefault(); return; }
   const k=KEYMAP[key]; if(k){ e.preventDefault(); const el=document.querySelector('[data-k="'+k+'"]'); el.classList.add('down'); setTimeout(()=>el.classList.remove('down'),100); if(k==='r'||k==='nb') press(k); else press(k); }
 });
-window.addEventListener('keyup',e=>{ if((e.key==='b'||e.key==='p')&&kbNb){ kbNb.dispatchEvent(new PointerEvent('pointerup')); kbNb=null; } });
+window.addEventListener('keyup',e=>{ if((e.key==='b'||e.key==='p'||e.key==='Enter'||e.key===' ')&&kbNb){ kbNb.dispatchEvent(new PointerEvent('pointerup')); kbNb=null; } });
 
 /* ---------- layout scaling ---------- */
 function fit(){

@@ -474,6 +474,7 @@ footer .fine{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,
 .rform legend{font:600 14px/1.3 var(--f-body);margin-bottom:12px;padding:0}
 .opt{font-weight:400;color:var(--muted)}
 .hp{position:absolute!important;left:-9999px;opacity:0;height:0;width:0}
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:6px}
 .stars input{position:absolute;opacity:0;width:1px;height:1px}
 .stars label{cursor:pointer;line-height:0}
