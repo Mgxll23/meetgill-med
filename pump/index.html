@@ -2195,15 +2195,15 @@ const SCENARIOS=[
    {t:'Enter Rate 125 ml/h',ev:'param',where:{field:'rate',val:125,ctx:'PRIM'}},
    {t:'Enter VTBI 500 ml (Time calculates 4 h)',ev:'param',where:{field:'vtbi',val:500,ctx:'PRIM'}},
    {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}},
-   {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
-   {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Press C to leave the running screen, ▼ to SECondary, OK, then ▼ to Back to PRIM, OK, and answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
+   {t:'▲ to New SECondary, then OK',ev:'sec-menu',where:{item:'new'}},
    {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
    {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
    {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
    {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
    {t:'Secondary is running',ev:'start',where:{ctx:'SEC'}},
   ],
-  walk:'Door key (far right) > ▲ Yes (IV line clamped) > Insert IV line (button under the pump) > close door > OK (clear reminder) > OK (confirm giving set) > OK (open roller clamp) > ▲ Yes (prime) > OK to stop at ~5 mL left > check for bubbles > ▼ No. THEN: OK at the home screen > Med / Surg (OK) > ▼ to IV fluid, OK > Rate: OK, ◀ to hundreds, ▲ 1, ◀... enter 125, OK > ▼ to VTBI, OK, enter 500, OK > Time shows 4h > Start/Stop. THEN: On the primary screen scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
+  walk:'Door key (far right) > ▲ Yes (IV line clamped) > Insert IV line (button under the pump) > close door > OK (clear reminder) > OK (confirm giving set) > OK (open roller clamp) > ▲ Yes (prime) > OK to stop at ~5 mL left > check for bubbles > ▼ No. THEN: OK at the home screen > Med / Surg (OK) > ▼ to IV fluid, OK > Rate: OK, ◀ to hundreds, ▲ 1, ◀... enter 125, OK > ▼ to VTBI, OK, enter 500, OK > Time shows 4h > Start/Stop. THEN: On the running screen press C > scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
  {ret:true,id:'ret-prim',title:'Primary IV fluid: 125 ml/h, VTBI 500 ml',
   brief:'The line is loaded and primed. Program a primary IV fluid for a Med / Surg patient: rate 125 ml/h, volume to be infused 500 ml, then start.',
   setup(){ fastOn(); },
@@ -2219,15 +2219,15 @@ const SCENARIOS=[
   brief:'A primary IV fluid (125 ml/h, 500 ml) is running. Set Back to PRIM to manual, then program a secondary, Intermittent (other), at 260 ml/h with VTBI 130 ml (30 min) and start it.',
   setup(){ fastOn(); quickIvf({rate:125,vtbi:500,start:true}); },
   steps:[
-   {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
-   {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Press C to leave the running screen, ▼ to SECondary, OK, then ▼ to Back to PRIM, OK, and answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
+   {t:'▲ to New SECondary, then OK',ev:'sec-menu',where:{item:'new'}},
    {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
    {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
    {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
    {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
    {t:'Secondary is running',ev:'start',where:{ctx:'SEC'}},
   ],
-  walk:'On the primary screen scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
+  walk:'On the running screen press C > scroll ▼ to SECondary, OK > ▼ to Back to PRIM, OK > ▼ No (manual) > ▲ to New SECondary, OK > ▼ to IV fluid, OK > Rate 260, OK > VTBI 130, OK > Time 30 min > Start/Stop > unclamp secondary & check bag height > Start/Stop.'},
  {ret:true,id:'ret-line',title:'Load the IV line and prime',
   brief:'The pump is on and the door is closed with no line. Open the door, load the line, close the door, confirm the giving set and prime the line.',
   setup(){ fastOn({line:false}); },
@@ -2258,7 +2258,7 @@ const SCENARIOS=[
   brief:'A primary Normal Saline is running (Med-Surg, adult). Set up Vancomycin 500 mg / 100 mL to run over 60 minutes as a secondary (piggyback) infusion and start it.',
   setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
   steps:[
-   {t:'Open SECondary > New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Press C, ▼ to SECondary, OK, then New SECondary, OK',ev:'sec-menu',where:{item:'new'}},
    {t:'Select drug Vancomycin (secondary)',ev:'drug',where:{id:'vanc',ctx:'SEC'}},
    {t:'Select concentration 500 mg / 100 mL',ev:'conc',where:{idx:0}},
    {t:'Enter total dose 500 mg',ev:'param',where:{field:'dose',val:500}},
@@ -2369,7 +2369,7 @@ const SCENARIOS=[
   brief:'Normal Saline is running (Med-Surg, adult). Piggyback Potassium Chloride 20 mEq / 100 mL over 2 hours (max 10 mEq/h hard limit) and start it.',
   setup(){ fastOn(); quickInf({unit:'Med-Surg',drug:'ns',rate:100,vtbi:1000,start:true}); },
   steps:[
-   {t:'Open SECondary > New SECondary',ev:'sec-menu',where:{item:'new'}},
+   {t:'Press C, ▼ to SECondary, OK, then New SECondary, OK',ev:'sec-menu',where:{item:'new'}},
    {t:'Select drug Potassium Chloride',ev:'drug',where:{id:'kcl',ctx:'SEC'}},
    {t:'Select concentration 20 mEq / 100 mL',ev:'conc',where:{idx:1}},
    {t:'Enter total dose 20 mEq',ev:'param',where:{field:'dose',val:20}},
@@ -2451,7 +2451,8 @@ var exam={
     if(!this.on||this.mode!=='coach') return;
     const n=this.steps.find(s=>!s.state), k=this.steps.indexOf(n)+1;
     if(!n){ coach.say('ok','Coach','✓ All steps done','Open Practice & score and press Finish & score.'); return; }
-    coach.say('ok','Coach · step '+k+' of '+this.steps.length,(lead?lead+' ':'')+'Next: '+n.t,COACH_TIPS[n.ev]||'');
+    coach.say('ok','Coach · step '+k+' of '+this.steps.length,(lead?lead+' ':'')+'Next: '+n.t,coachTip(n.ev));
+    coach.at=S.ui&&S.ui.id;
   },
   setMode(m){
     this.mode=m==='exam'?'exam':'coach';
@@ -2514,7 +2515,7 @@ var exam={
       const w={type,data,at:Date.now()}; this.wrong.push(w); this.progress();
       if(this.mode==='coach'){
         const exp=pend.find(s=>s.ev===type), n=this.steps.find(s=>!s.state);
-        coach.say('bad','Coach · not quite','✗ '+this.describeWrong(w),(exp?'The order asks: '+exp.t+'. ':'')+(COACH_TIPS[(exp||n||{}).ev]||''));
+        coach.say('bad','Coach · not quite','✗ '+this.describeWrong(w),(exp?'The order asks: '+exp.t+'. ':'')+coachTip((exp||n||{}).ev));
       }
     }
   },
@@ -2585,6 +2586,25 @@ var coach={
   hide(){ const el=$('#coach'); if(el) el.hidden=true; document.body.classList.remove('coachtop'); }
 };
 window.addEventListener('resize',()=>setTimeout(()=>coach.place(),0));
+/* the tip depends on the screen: refresh it when the pump changes screen (a step card only, never a "not quite" card) */
+setInterval(()=>{
+  const el=$('#coach'); if(!el||el.hidden||!el.classList.contains('ok')||!exam.on||exam.mode!=='coach') return;
+  const id=S.ui&&S.ui.id; if(id===coach.at) return;
+  const n=exam.steps.find(s=>!s.state); if(!n) return;
+  coach.at=id; $('#coachB').textContent=coachTip(n.ev); coach.place();
+},400);
+function coachTip(type){
+  const id=S.ui&&S.ui.id;
+  if(id==='editor') return 'The highlighted digit is the one you change: ▲ ▼ change it, ◀ ▶ move between digits, OK saves.';
+  if(id==='yesno') return 'On this screen ▲ means Yes and ▼ means No.';
+  if(type==='sec-menu'){
+    if(id==='run') return 'You are on the running screen, where ▼ only changes the bottom line. Press C first to open the menu.';
+    if(id==='home') return 'Use ▲ ▼ to highlight SECondary (or the item you need), then press OK.';
+    return 'Use ▲ ▼ to highlight it, then press OK.';
+  }
+  if((type==='param'||type==='weight')&&id==='run') return 'You are on the running screen: ◀ opens the rate (or doserate) editor. For any other field press C to open the menu, highlight it with ▲ ▼ and press OK.';
+  return COACH_TIPS[type]||'';
+}
 /* how to do each kind of step on this pump (Coach mode) */
 const COACH_TIPS={
   door:'The door key is the button on the far right of the pump. ▲ means Yes on the question screens.',
@@ -2593,7 +2613,7 @@ const COACH_TIPS={
   prime:'On this screen ▲ means Yes and ▼ means No.', override:'On this screen ▲ means Yes and ▼ means No.', loadq:'On this screen ▲ means Yes and ▼ means No.',
   careunit:'From the home screen press OK, then use ▲ ▼ to highlight it and press OK.',
   profile:'Use ▲ ▼ to highlight it, then press OK.', drug:'Use ▲ ▼ to highlight it, then press OK.', conc:'Use ▲ ▼ to highlight it, then press OK.',
-  ivfluid:'Use ▲ ▼ to highlight it, then press OK.', mode:'Use ▲ ▼ to highlight it, then press OK.', 'sec-menu':'On the running screen use ▼ to reach SECondary, press OK, then pick the item with ▲ ▼ and OK.',
+  ivfluid:'Use ▲ ▼ to highlight it, then press OK.', mode:'Use ▲ ▼ to highlight it, then press OK.', 'sec-menu':'Use ▲ ▼ to highlight it, then press OK.',
   'bolus-menu':'Tap the BOL key.', 'unit-change':'Use ▲ ▼ to highlight it, then press OK.',
   param:'Highlight the field and press OK. ◀ ▶ move between digits, ▲ ▼ change a digit, OK saves it.',
   weight:'◀ ▶ move between digits, ▲ ▼ change a digit, OK saves it.',
