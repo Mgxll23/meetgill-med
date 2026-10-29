@@ -263,6 +263,9 @@ html[data-theme=light] .chip.bad{color:#b91c1c;border-color:#d9a09a}
 /* portrait: while the coach card is up, the pump sits at the top so the card fits underneath */
 body.coachtop #stage{align-items:flex-start;padding-top:4px}
 #coach.cleft{left:8px;transform:none;max-width:calc(100vw - 230px)}
+/* short landscape screens (phones): the card gets its own column on the left, the pump sits to its right */
+body.coachside #stage{left:250px}
+#coach.cside{left:8px;transform:none;width:236px;max-width:236px;font-size:13px;line-height:1.3;padding:8px 36px 8px 11px}
 @media (max-width:600px){ #coach{font-size:13px;line-height:1.3;padding:7px 38px 7px 11px;width:calc(100vw - 16px);max-width:none} #coach .cn{font-size:10.5px;margin-bottom:1px} #coach .cb{margin-top:2px} #coach button{width:32px;height:32px} }
 #coach[hidden]{display:none}
 #coach span{display:block;font-weight:400}
@@ -2091,9 +2094,14 @@ window.addEventListener('keyup',e=>{ if((e.key==='b'||e.key==='p'||e.key==='Ente
 function fit(){
   const wide=window.innerWidth>=1200;
   document.body.classList.toggle('wide',wide);
-  const availW=wide?window.innerWidth-400:window.innerWidth, availH=window.innerHeight;
+  const rawW=wide?window.innerWidth-400:window.innerWidth, rawH=window.innerHeight;
+  /* while the coach card is up, leave it room: a column on the left on short landscape screens, a strip under the pump otherwise */
+  const cEl=$('#coach'), cOn=!!cEl&&!cEl.hidden;
+  const side=cOn&&rawW>rawH&&rawH<560;
+  document.body.classList.toggle('coachside',side);
+  const availW=rawW-(side?250:0), availH=rawH-(cOn&&!side?136:0);
   const rig=$('#rig'), wrap=$('#pumpWrap');
-  const port=availW/availH<1.15;
+  const port=rawW/rawH<1.15;
   rig.classList.toggle('port',port); rig.classList.toggle('land',!port);
   rig.style.transform='none';
   const w=rig.offsetWidth, h=rig.offsetHeight;
@@ -2569,12 +2577,15 @@ var coach={
     const el=$('#coach'); if(!el) return;
     el.className=kind==='ok'?'ok':'';
     $('#coachN').textContent=label||''; $('#coachT').textContent=title; $('#coachB').textContent=body||'';
-    el.hidden=false; this.place();
+    const was=el.hidden; el.hidden=false; if(was) fit(); this.place();
   },
   /* under the pump when there is room for the card, otherwise at the top of the screen */
   place(){
     const el=$('#coach'); if(!el||el.hidden) return;
-    document.body.classList.toggle('coachtop',$('#rig').classList.contains('port'));
+    const side=document.body.classList.contains('coachside');
+    document.body.classList.toggle('coachtop',!side);
+    el.classList.toggle('cside',side);
+    if(side){ el.classList.remove('cleft'); el.style.top='10px'; return; }
     const r=$('#pump').getBoundingClientRect(), d=$('#doorBar').getBoundingClientRect();
     const below=Math.max(r.bottom,d.bottom)+8;
     el.classList.remove('cleft');
@@ -2583,7 +2594,7 @@ var coach={
     if(!fits&&!document.body.classList.contains('wide')&&innerWidth>600) el.classList.add('cleft');
     el.style.top=(fits?below:10)+'px';
   },
-  hide(){ const el=$('#coach'); if(el) el.hidden=true; document.body.classList.remove('coachtop'); }
+  hide(){ const el=$('#coach'); if(!el) return; const was=!el.hidden; el.hidden=true; document.body.classList.remove('coachtop'); if(was) fit(); }
 };
 window.addEventListener('resize',()=>setTimeout(()=>coach.place(),0));
 /* the tip depends on the screen: refresh it when the pump changes screen (a step card only, never a "not quite" card) */
